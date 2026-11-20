@@ -30,7 +30,7 @@ def test_description_present_and_short() -> None:
 
 def test_no_sharp_s() -> None:
     for path in [SKILL, *SKILL_DIR.glob("references/*.md")]:
-        assert "00df" not in path.read_text(encoding="utf-8"), path
+        assert chr(0xDF) not in path.read_text(encoding="utf-8"), path
 
 
 def test_disclaimer_and_v0_marker() -> None:

@@ -8,7 +8,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 TEXT_SUFFIXES = {".md", ".py", ".yaml", ".json", ".html", ".toml", ".yml"}
-SHARP_S = "ß"
+SHARP_S = chr(0xDF)
 
 
 def _tracked_files() -> list[Path]:
