@@ -166,6 +166,28 @@
         "date": "2026-09-02"
       },
       "status": "evidenced"
+    },
+    {
+      "id": "A-014",
+      "type": "requirement",
+      "statement": "Online-Formulare (zum Beispiel Adressänderung) sollen im Dialog ausgefüllt werden; AskDesk hat dafür kein Formularmodul.",
+      "source": {
+        "kind": "workshop",
+        "ref": "evidence/workshop-anforderungen.md",
+        "date": "2026-09-02"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-015",
+      "type": "usage_signal",
+      "statement": "Geschätzter Aufwand: etwa 10 Minuten je Standardanfrage; Einführung per Konfiguration in etwa 10 Personentagen.",
+      "source": {
+        "kind": "analytics",
+        "ref": "evidence/auswertung-anfragevolumen.md",
+        "date": "2026-07-10"
+      },
+      "status": "evidenced"
     }
   ],
   "phases": [
@@ -231,7 +253,8 @@
           "question": "Steht der erwartete Nutzen in einem vertretbaren Verhältnis zum Aufwand für Integration und Auflagen?",
           "answer": "yes",
           "atom_refs": [
-            "A-002"
+            "A-002",
+            "A-015"
           ],
           "source_ref": "S03"
         },
@@ -247,9 +270,10 @@
         {
           "id": "G0-05",
           "question": "Lassen sich die bekannten Anforderungen innerhalb der Konfigurationsgrenze der Lösung umsetzen, ohne Neuentwicklung?",
-          "answer": "yes",
+          "answer": "no",
           "atom_refs": [
-            "A-008"
+            "A-008",
+            "A-014"
           ],
           "source_ref": "S04"
         }
@@ -357,7 +381,8 @@
       "status": "proposed",
       "atom_refs": [
         "A-007",
-        "A-008"
+        "A-008",
+        "A-014"
       ],
       "product_decision_ref": "A-007"
     },

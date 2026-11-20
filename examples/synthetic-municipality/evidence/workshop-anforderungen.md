@@ -8,3 +8,4 @@ Datum: 2026-09-02. Teilnehmende (nur Rollen): Leiterin Einwohnerdienste, Sachbea
 - Wunsch (nicht belegt): Antworten auch auf Englisch. Der Bedarf wurde geäussert, aber nicht mit Zahlen unterlegt.
 - Befürchtung (nicht belegt): Die Sachbearbeitung könnte die Lösung ablehnen. Es gibt dazu keine Erhebung.
 - Entscheid: Für Online-Formulare, die AskDesk nicht abdeckt, wird ein eigenes Modul entwickelt, statt auf die Produktplanung des Herstellers zu warten.
+- Anforderung: Online-Formulare (zum Beispiel Adressänderung) sollen im Dialog ausgefüllt werden. AskDesk hat dafür kein Formularmodul.
