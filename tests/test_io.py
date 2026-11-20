@@ -188,3 +188,10 @@ def test_load_json_non_utf8_raises_adoptionkit_error(tmp_path: Path) -> None:
     f.write_bytes('{"a": "ä"}'.encode("latin-1"))
     with pytest.raises(AdoptionkitError, match="UTF-8"):
         load_json(f)
+
+
+def test_load_engagement_invalid_message_has_umlaut(tmp_path: Path) -> None:
+    f = tmp_path / "e.json"
+    f.write_text(json.dumps(make_engagement(atoms=[atom("A-001"), atom("A-001")])))
+    with pytest.raises(AdoptionkitError, match="ungültig"):
+        load_engagement(f)

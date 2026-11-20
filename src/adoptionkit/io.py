@@ -126,7 +126,7 @@ def load_engagement(path: str | Path) -> Engagement:
     issues = validate_data(data)
     if issues:
         detail = "\n".join(f"{i.path}: {i.message}" for i in issues)
-        raise AdoptionkitError(f"{path}: ungueltig\n{detail}")
+        raise AdoptionkitError(f"{path}: ungültig\n{detail}")
     return Engagement.model_validate(data)
 
 
