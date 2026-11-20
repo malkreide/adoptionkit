@@ -1,8 +1,12 @@
 """Command-line entry point for adoptionkit."""
 
+from pathlib import Path
+
 import typer
 
 from adoptionkit import __version__
+from adoptionkit.errors import AdoptionkitError
+from adoptionkit.io import load_json, validate_data
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -27,6 +31,21 @@ def _root(
     ),
 ) -> None:
     """adoptionkit CLI."""
+
+
+@app.command()
+def validate(file: Path = typer.Argument(..., help="Engagement-Datei (JSON).")) -> None:
+    """Engagement-Datei gegen Schema und Integritaetsregeln pruefen."""
+    try:
+        issues = validate_data(load_json(file))
+    except AdoptionkitError as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(1) from exc
+    if issues:
+        for issue in issues:
+            typer.echo(f"{issue.path}: {issue.message}")
+        raise typer.Exit(1)
+    typer.echo(f"ok: {file}")
 
 
 def main() -> None:
