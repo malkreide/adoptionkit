@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__ENGAGEMENT_TITLE__</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff; --fg: #1d2433; --muted: #5b6475; --line: #d5d9e2; --head: #f2f4f8;
+  --band-bg: #fff3c4; --band-fg: #5a4500;
+  --ok-bg: #d8f2de; --ok-fg: #12501f;
+  --warn-bg: #fff0c2; --warn-fg: #6b4a00;
+  --bad-bg: #fbdada; --bad-fg: #7a1414;
+  --link: #0b4fa8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171f; --fg: #e6e9f0; --muted: #a0a8b8; --line: #343a48; --head: #1d222d;
+    --band-bg: #4a3d0a; --band-fg: #ffe9a0;
+    --ok-bg: #173a22; --ok-fg: #a9e6b8;
+    --warn-bg: #4a3a0a; --warn-fg: #ffe08a;
+    --bad-bg: #4a1c1c; --bad-fg: #ffb3b3;
+    --link: #8ab8ff;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0 16px 48px; background: var(--bg); color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 1000px; margin: 0 auto; }
+h1 { font-size: 1.6rem; margin: 24px 0 8px; }
+h2 { font-size: 1.25rem; margin: 32px 0 12px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+h3 { font-size: 1.05rem; margin: 20px 0 8px; }
+a { color: var(--link); }
+.band { background: var(--band-bg); color: var(--band-fg); padding: 8px 16px; margin: 0 -16px;
+  font-weight: 600; text-align: center; }
+.meta { color: var(--muted); margin: 0 0 8px; }
+.meta strong { color: var(--fg); }
+.wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--line); }
+th { background: var(--head); font-weight: 600; }
+tr:target td { outline: 2px solid var(--link); outline-offset: -2px; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.85rem;
+  font-weight: 600; white-space: nowrap; }
+.s-ok { background: var(--ok-bg); color: var(--ok-fg); }
+.s-warn { background: var(--warn-bg); color: var(--warn-fg); }
+.s-bad { background: var(--bad-bg); color: var(--bad-fg); }
+.s-neutral { background: var(--head); color: var(--muted); border: 1px solid var(--line); }
+.gate { margin-bottom: 24px; }
+.disclaimer { color: var(--muted); font-size: 0.9rem; font-style: italic; margin: 8px 0 0; }
+.empty { color: var(--muted); }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script type="application/json" id="engagement-data">/*__ENGAGEMENT_JSON__*/null</script>
+<script>
+(function () {
+  "use strict";
+  var data = JSON.parse(document.getElementById("engagement-data").textContent);
+  var app = document.getElementById("app");
+
+  var PHASE = { discovery: "Entdeckung", prototype: "Prototyp", value_proof: "Wertnachweis",
+    hardening: "Härtung", handover: "Übergabe" };
+  var PHASE_STATUS = { planned: "geplant", running: "laufend", done: "abgeschlossen",
+    aborted: "abgebrochen" };
+  var RESULT = { passed: "bestanden", open: "offen", stopped: "gestoppt" };
+  var RESULT_CLASS = { passed: "s-ok", open: "s-warn", stopped: "s-bad" };
+  var ATOM_STATUS = { evidenced: "belegt", assumed: "angenommen", refuted: "widerlegt" };
+  var ATOM_CLASS = { evidenced: "s-ok", assumed: "s-warn", refuted: "s-bad" };
+  var ATOM_TYPE = { requirement: "Anforderung", constraint: "Randbedingung",
+    data_source: "Datenquelle", risk: "Risiko", usage_signal: "Nutzungssignal",
+    decision: "Entscheid" };
+  var SOURCE_KIND = { interview: "Interview", document: "Dokument", system: "System",
+    analytics: "Auswertung", regulation: "Regelwerk", workshop: "Workshop" };
+  var RECOMMENDATION = { guided_rollout: "Begleiteter Rollout", standard_rollout: "Standard-Rollout",
+    decline: "Ablehnen" };
+  var ANSWER = { yes: "ja", no: "nein", unclear: "unklar", "n/a": "nicht anwendbar" };
+  var ANSWER_CLASS = { yes: "s-ok", no: "s-bad", unclear: "s-warn", "n/a": "s-neutral" };
+
+  function el(tag, text, cls) {
+    var e = document.createElement(tag);
+    if (text !== undefined && text !== null) { e.textContent = String(text); }
+    if (cls) { e.setAttribute("class", cls); }
+    return e;
+  }
+  function label(map, value) {
+    return Object.prototype.hasOwnProperty.call(map, value) ? map[value] : value;
+  }
+  function cls(map, value) {
+    return Object.prototype.hasOwnProperty.call(map, value) ? map[value] : "s-neutral";
+  }
+  function badge(text, klass, raw) {
+    var b = el("span", text, "badge " + klass);
+    if (raw) { b.setAttribute("title", raw); }
+    return b;
+  }
+  function dash(v) { return v === undefined || v === null || v === "" ? "–" : v; }
+  function table(headers, rows) {
+    var wrap = el("div", null, "wrap");
+    var t = el("table");
+    var thead = el("thead");
+    var hr = el("tr");
+    headers.forEach(function (h) {
+      var th = el("th", h);
+      th.setAttribute("scope", "col");
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+    t.appendChild(thead);
+    var tb = el("tbody");
+    rows.forEach(function (r) { tb.appendChild(r); });
+    t.appendChild(tb);
+    wrap.appendChild(t);
+    return wrap;
+  }
+  function row(cells, id) {
+    var tr = el("tr");
+    if (id) { tr.setAttribute("id", id); }
+    cells.forEach(function (c) {
+      var td = el("td");
+      if (c instanceof Node) { td.appendChild(c); } else { td.textContent = String(c); }
+      tr.appendChild(td);
+    });
+    return tr;
+  }
+  function section(title) { app.appendChild(el("h2", title)); }
+  function emptyNote(text) { app.appendChild(el("p", text, "empty")); }
+  function metaLine(name, value) {
+    var p = el("p", null, "meta");
+    p.appendChild(el("strong", name + ": "));
+    p.appendChild(document.createTextNode(String(value)));
+    return p;
+  }
+
+  if (!data) { app.appendChild(el("p", "Keine Daten.", "empty")); return; }
+
+  // Kopf
+  if (data.meta.synthetic) {
+    var band = el("div", "Synthetische Daten", "band");
+    band.setAttribute("role", "note");
+    document.body.insertBefore(band, document.body.firstChild);
+  }
+  app.appendChild(el("h1", data.meta.title));
+  app.appendChild(metaLine("Auftraggeberin", data.parties.client));
+  app.appendChild(metaLine("Auftragnehmerin", data.parties.contractor));
+  app.appendChild(metaLine("Lösung", data.solution.name + " (" + data.solution.vendor + ")"));
+
+  // Phasen
+  section("Phasen");
+  var phases = data.phases || [];
+  if (phases.length === 0) {
+    emptyNote("Keine Phasen erfasst.");
+  } else {
+    app.appendChild(table(
+      ["Phase", "Status", "Budget (Tage)", "Start", "Ende", "Abbruchkriterium"],
+      phases.map(function (p) {
+        var name = el("span", label(PHASE, p.id));
+        name.setAttribute("title", p.id);
+        return row([name, label(PHASE_STATUS, p.status), p.budget_days, dash(p.start),
+          dash(p.end), dash(p.abort_criterion)]);
+      })
+    ));
+  }
+
+  // Gates
+  section("Gates");
+  var gates = data.gates || [];
+  if (gates.length === 0) { emptyNote("Keine Gates erfasst."); }
+  gates.forEach(function (g) {
+    var box = el("div", null, "gate");
+    box.appendChild(el("h3", g.id + ": " + g.title));
+    var p = el("p", null, "meta");
+    p.appendChild(el("strong", "Ergebnis: "));
+    if (g.result) {
+      p.appendChild(badge(label(RESULT, g.result), cls(RESULT_CLASS, g.result), g.result));
+    } else {
+      p.appendChild(badge("nicht ausgewertet", "s-neutral"));
+    }
+    if (g.recommendation) {
+      p.appendChild(document.createTextNode(
+        " Empfehlung: " + label(RECOMMENDATION, g.recommendation)));
+    }
+    if (g.evaluated_on) {
+      p.appendChild(document.createTextNode(" (Stand " + g.evaluated_on + ")"));
+    }
+    box.appendChild(p);
+    var checks = g.checks || [];
+    if (checks.length > 0) {
+      box.appendChild(table(["Nr.", "Frage", "Antwort", "Atome"], checks.map(function (c) {
+        var links = el("span");
+        var refs = c.atom_refs || [];
+        if (refs.length === 0) { links.textContent = "–"; }
+        refs.forEach(function (ref, i) {
+          if (i > 0) { links.appendChild(document.createTextNode(", ")); }
+          var a = el("a", ref);
+          a.setAttribute("href", "#atom-" + ref);
+          links.appendChild(a);
+        });
+        return row([c.id, c.question,
+          badge(label(ANSWER, c.answer), cls(ANSWER_CLASS, c.answer), c.answer), links]);
+      })));
+    }
+    box.appendChild(el("p", g.disclaimer, "disclaimer"));
+    app.appendChild(box);
+  });
+
+  // Atome
+  section("Atome");
+  var atoms = data.atoms || [];
+  if (atoms.length === 0) {
+    emptyNote("Keine Atome erfasst.");
+  } else {
+    app.appendChild(table(["ID", "Typ", "Aussage", "Status", "Quelle"], atoms.map(function (a) {
+      var src = a.source || {};
+      var srcText = label(SOURCE_KIND, src.kind);
+      if (src.ref) { srcText += ", " + src.ref; }
+      if (src.date) { srcText += ", " + src.date; }
+      return row([a.id, label(ATOM_TYPE, a.type), a.statement,
+        badge(label(ATOM_STATUS, a.status), cls(ATOM_CLASS, a.status), a.status), srcText],
+        "atom-" + a.id);
+    })));
+  }
+})();
+</script>
+</body>
+</html>

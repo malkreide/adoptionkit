@@ -22,6 +22,7 @@ from adoptionkit.models import (
     GateId,
 )
 from adoptionkit.profiles import Profile, gate_from_profile, load_profile, load_profile_file
+from adoptionkit.viewer import render_html
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -213,6 +214,23 @@ def init(
     except OSError as exc:
         raise _fail(f"{folder}: nicht anlegbar: {exc}") from exc
     typer.echo(f"angelegt: {target}")
+
+
+@app.command()
+def view(
+    file: Path = typer.Argument(..., help="Engagement-Datei (JSON)."),
+    output: Path = typer.Option(Path("dossier.html"), "-o", "--output", help="Ausgabedatei (HTML)."),
+) -> None:
+    """Engagement als eigenständige HTML-Datei ausgeben."""
+    try:
+        eng = load_engagement(file)
+    except AdoptionkitError as exc:
+        raise _fail(str(exc)) from exc
+    try:
+        output.write_text(render_html(eng), encoding="utf-8")
+    except OSError as exc:
+        raise _fail(f"{output}: nicht schreibbar: {exc}") from exc
+    typer.echo(str(output))
 
 
 def main() -> None:
