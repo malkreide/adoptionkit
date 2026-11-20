@@ -13,9 +13,9 @@ Das Paket `adoptionkit` arbeitet lokal: keine Netzwerkzugriffe, keine Modellaufr
 
 Diese Regeln gelten immer. Sie schützen davor, dass ein Dossier mehr behauptet, als belegt ist.
 
-1. **Fehlende Quelle: nachfragen, nicht ergänzen.** Fehlt zu einer Aussage Quelle, Datum oder Urheber, frage die Person danach. Erfinde nichts und fülle nichts aus Allgemeinwissen auf.
+1. **Fehlende Quelle: nachfragen, nicht ergänzen.** Fehlt zu einer Aussage Quelle, Datum oder Urheber, frage die Person danach. Erfinde nichts und fülle nichts aus Allgemeinwissen auf. Eine eigene Schlussfolgerung ohne Quelle schreibst du nicht als Atom: Frage nach der Herkunft, sonst lass das Atom weg (ein leeres `source.ref` ist L001, ein Fehler).
 2. **Nichts Unbelegtes ins Dossier.** Jede Aussage wird ein Atom mit `source.ref`. Ist die Aussage nur eine Vermutung, setze `status: assumed`. Eine Annahme schliesst nie ein Gate (siehe unten); sie zeigt, was noch zu belegen ist.
-3. **Gate-Fragen nie selbst mit `yes` oder `no` beantworten.** Schlage eine Antwort vor, nenne die Atom-IDs, die sie stützen, und lass die Person bestätigen. Erst nach der Bestätigung trägst du `answer` und `atom_refs` ein. Ohne Beleg bleibt die Antwort `unclear`.
+3. **Gate-Fragen nie selbst beantworten.** Setze `answer` (auch `unclear` oder `n/a`) nie selbst, sondern nur nach Bestätigung durch die Person: Schlage eine Antwort vor, nenne die Atom-IDs, die sie stützen, und lass bestätigen. `n/a` überspringt eine Prüffrage und ist darum kein Ausweg. Ohne Beleg bleibt die Antwort `unclear` (der Anfangszustand nach `init`).
 4. **Keine rechtlichen Urteile.** Äussere nie, ob etwas rechtskonform, zulässig oder bewilligungsfähig ist. Verweise stattdessen auf den Hinweis: «Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären.»
 5. **Beschlüsse und Zahlen gehören der Person.** Budgets, Abbruchkriterien und Produktentscheide trägst du nur ein, wenn die Person sie genannt hat.
 
@@ -58,7 +58,7 @@ adoptionkit lint <datei> [--json] [--profile <name|pfad>]
 | L005 | error | Gestartete Phase ab `prototype` ohne Abbruchkriterium |
 | L007 | error | Phase gestartet oder abgeschlossen, ohne dass das geforderte Gate bestanden ist |
 
-Behebe Befunde nicht durch Erfinden: bei L001 nach der Quelle fragen, bei L004 und L005 die Person entscheiden lassen. Weitere Lint-Regeln gibt es in Stufe 0 nicht.
+L004 greift auch, wenn der verwiesene Produktentscheid kein Atom vom Typ `decision` ist. L007 hängt vom Profil ab. Behebe Befunde nicht durch Erfinden: bei L001 nach der Quelle fragen, bei L004 und L005 die Person entscheiden lassen. Weitere Lint-Regeln gibt es in Stufe 0 nicht.
 
 ### 4. Gates auswerten
 
@@ -80,14 +80,17 @@ Regeln der Auswertung (der Code ist massgeblich, nicht deine Einschätzung):
 - `yes` oder `no` zählt nur mit mindestens einem Atom im Status `evidenced` in `atom_refs`; sonst bleibt die Frage offen («nicht belegt»).
 - Atome mit Status `assumed` schliessen kein Gate.
 - `unclear` hält das Gate offen, `n/a` wird übersprungen.
-- Lint-Fehler blockieren `gate`: die Datei bleibt unverändert, behebe zuerst die Befunde.
+- Lint-Fehler blockieren `gate`: die Datei bleibt unverändert, behebe zuerst die Befunde. Ausnahme: L007-Befunde zum Gate, das gerade ausgewertet wird, blockieren nicht.
 - G0 liefert zusätzlich eine Empfehlung (`guided_rollout`, `standard_rollout`, `decline`).
 
 Gib das Ergebnis wieder, ohne es rechtlich zu deuten. Bei `open` nennst du, welche Belege fehlen; bei `stopped` nennst du die Abbruchbedingung und überlässt die Entscheidung der Person.
 
 ### 5. Phasen führen
 
-Jede Phase ab `prototype` braucht ein `abort_criterion` und ein bestandenes Gate, bevor sie gestartet wird (L005, L007). Frage nach Budget (`budget_days`) und Abbruchkriterium, statt Werte vorzuschlagen, die niemand genannt hat. Setze `status` erst auf `running` oder `done`, wenn die Person es bestätigt, und führe danach `lint` aus. Massnahmen (`measures`) verweisen mit `atom_refs` auf ihre Belege; Neuentwicklungen brauchen einen Produktentscheid als Atom.
+- L005 gilt für jede gestartete Phase (`running`, `done`, `aborted`) ab `prototype`: ohne `abort_criterion` ein Fehler.
+- L007 hängt vom Profil ab. Im Profil `generic`: G0 vor `discovery`, G3 vor `value_proof`, G4 zum Abschluss von `handover`. `prototype` und `hardening` verlangen im Profil `generic` kein Gate. Andere Profile können abweichen; prüfe mit `lint`.
+
+Frage nach Budget (`budget_days`) und Abbruchkriterium, statt Werte vorzuschlagen, die niemand genannt hat. Setze `status` erst auf `running` oder `done`, wenn die Person es bestätigt, und führe danach `lint` aus. Massnahmen (`measures`) verweisen mit `atom_refs` auf ihre Belege; Neuentwicklungen brauchen einen Produktentscheid als Atom.
 
 ### 6. Dossier ansehen
 
