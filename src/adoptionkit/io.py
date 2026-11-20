@@ -25,13 +25,15 @@ def load_json(path: str | Path) -> dict[str, Any]:
     p = Path(path)
     try:
         text = p.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        raise AdoptionkitError(f"{p}: Datei ist nicht UTF-8-kodiert: {exc.reason}") from exc
     except OSError as exc:
         raise AdoptionkitError(f"{p}: Datei nicht lesbar: {exc}") from exc
     try:
         data = json.loads(text)
     except json.JSONDecodeError as exc:
         raise AdoptionkitError(
-            f"{p}: ungueltiges JSON (Zeile {exc.lineno}, Spalte {exc.colno}): {exc.msg}"
+            f"{p}: ungültiges JSON (Zeile {exc.lineno}, Spalte {exc.colno}): {exc.msg}"
         ) from exc
     if not isinstance(data, dict):
         raise AdoptionkitError(f"{p}: JSON-Wurzel muss ein Objekt sein")

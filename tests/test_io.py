@@ -174,3 +174,17 @@ def test_roundtrip(tmp_path: Path) -> None:
     assert load_engagement(out) == eng
     save_engagement(load_engagement(out), tmp_path / "out2.json")
     assert out.read_text(encoding="utf-8") == (tmp_path / "out2.json").read_text(encoding="utf-8")
+
+
+def test_load_json_invalid_json_message_has_umlaut(tmp_path: Path) -> None:
+    f = tmp_path / "bad.json"
+    f.write_text("{ nope", encoding="utf-8")
+    with pytest.raises(AdoptionkitError, match="ungültiges JSON"):
+        load_json(f)
+
+
+def test_load_json_non_utf8_raises_adoptionkit_error(tmp_path: Path) -> None:
+    f = tmp_path / "latin.json"
+    f.write_bytes('{"a": "ä"}'.encode("latin-1"))
+    with pytest.raises(AdoptionkitError, match="UTF-8"):
+        load_json(f)

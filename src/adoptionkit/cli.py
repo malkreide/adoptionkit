@@ -35,7 +35,7 @@ def _root(
 
 @app.command()
 def validate(file: Path = typer.Argument(..., help="Engagement-Datei (JSON).")) -> None:
-    """Engagement-Datei gegen Schema und Integritaetsregeln pruefen."""
+    """Engagement-Datei gegen Schema und Integritätsregeln prüfen."""
     try:
         issues = validate_data(load_json(file))
     except AdoptionkitError as exc:
