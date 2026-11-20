@@ -148,10 +148,18 @@ A gate is `passed` when no question is `unclear` and every `yes`/`no` answer ref
 - Example data is synthetic. Do not commit real personal data or internal documents.
 - Pre-alpha: the schema and the profiles may still change.
 
-## Development
+## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), `docs/BAUPLAN.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`, [CHANGELOG.md](CHANGELOG.md).
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Background: `docs/BAUPLAN.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`, [CHANGELOG.md](CHANGELOG.md).
+
+## Security
+
+Please report vulnerabilities as described in [SECURITY.md](SECURITY.md). Dossiers can contain internal information: keep real cases local and out of the repository.
 
 ## Licence
 
 MIT, see [LICENSE](LICENSE). Copyright (c) 2026 Hayal Özkan.
+
+## Author
+
+Hayal Özkan · [malkreide](https://github.com/malkreide)

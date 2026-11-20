@@ -1,4 +1,17 @@
-description: "Evidence-based adoption of an AI solution in an organisation: evidence atoms, gates as YAML checklists, lints, single-file viewer and a Claude skill."
+# .github/repo-meta.yml — von der github-repo Skill gepflegt
+repo_name: adoptionkit
+title: adoptionkit
+project_type: python-lib
+visibility: public
+license: MIT
+author_legal_name: Hayal Özkan
+author_label: Autor
+github_user: malkreide
+default_branch: main
+language: python
+version: 0.0.1.dev0
+pypi_package: adoptionkit
+description: "Evidence-based AI adoption: evidence atoms, gate checklists, lints, offline viewer, Claude skill"
 topics:
   - ai-adoption
   - evidence-based
@@ -6,3 +19,8 @@ topics:
   - claude-skill
   - python
   - json-schema
+confirmed: false          # Vorschläge aus Stufe 0, vor dem Anlegen des Repos bestätigen
+offen:
+  - Repo anlegen, Description und Topics setzen (macht Hayal selbst)
+  - Secret Scanning und Push Protection aktivieren (nach dem Anlegen)
+  - lokalen Ordner ~/deploykit in ~/adoptionkit umbenennen

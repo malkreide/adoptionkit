@@ -147,10 +147,18 @@ Ein Gate ist `passed`, wenn keine Frage `unclear` ist und jede `yes`/`no`-Antwor
 - Beispieldaten sind synthetisch. Keine echten personenbezogenen Daten oder internen Dokumente committen.
 - Pre-Alpha: Schema und Profile können sich noch ändern.
 
-## Entwicklung
+## Mitwirken
 
-Siehe [CONTRIBUTING.md](CONTRIBUTING.md), `docs/BAUPLAN.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`, [CHANGELOG.md](CHANGELOG.md).
+Beiträge sind willkommen – siehe [CONTRIBUTING.md](CONTRIBUTING.md). Hintergrund: `docs/BAUPLAN.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`, [CHANGELOG.md](CHANGELOG.md).
+
+## Sicherheit
+
+Schwachstellen bitte wie in [SECURITY.md](SECURITY.md) beschrieben melden. Dossiers können interne Informationen enthalten: reale Fälle lokal halten und nicht ins Repo legen.
 
 ## Lizenz
 
 MIT, siehe [LICENSE](LICENSE). Copyright (c) 2026 Hayal Özkan.
+
+## Autor
+
+Hayal Özkan · [malkreide](https://github.com/malkreide)
