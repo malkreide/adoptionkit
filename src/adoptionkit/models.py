@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Literal
+from typing import Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field
 
 SCHEMA_VERSION = "0.1"
-DISCLAIMER = (
+DisclaimerText = Literal[
     "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären."
-)
+]
+# Single source of truth: the Literal above (fixed in the JSON schema); the constant derives from it.
+DISCLAIMER: DisclaimerText = get_args(DisclaimerText)[0]
 PHASE_ORDER = ("discovery", "prototype", "value_proof", "hardening", "handover")
 
 AtomType = Literal["requirement", "constraint", "data_source", "risk", "usage_signal", "decision"]
@@ -95,7 +97,7 @@ class Gate(_Base):
     result: GateResult | None = None
     recommendation: Recommendation | None = None
     evaluated_on: dt.date | None = None
-    disclaimer: str = DISCLAIMER
+    disclaimer: DisclaimerText = DISCLAIMER
 
 
 class Measure(_Base):

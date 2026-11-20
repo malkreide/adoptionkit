@@ -6,9 +6,10 @@ import html
 import json
 from importlib import resources
 
-from adoptionkit.models import Engagement
+from adoptionkit.models import DISCLAIMER, Engagement
 
 PLACEHOLDER = "/*__ENGAGEMENT_JSON__*/null"
+DISCLAIMER_PLACEHOLDER = "/*__DISCLAIMER_JSON__*/null"
 
 
 def _template() -> str:
@@ -33,4 +34,6 @@ def render_html(eng: Engagement) -> str:
     head, tail = template.split(PLACEHOLDER)
     head = head.replace("__ENGAGEMENT_TITLE__", title)
     tail = tail.replace("__ENGAGEMENT_TITLE__", title)
+    # The disclaimer is always the constant from the code, never the value stored in the file.
+    tail = tail.replace(DISCLAIMER_PLACEHOLDER, json.dumps(DISCLAIMER, ensure_ascii=False))
     return head + _embed_json(eng) + tail

@@ -101,3 +101,14 @@ def test_cli_view_unwritable_output(tmp_path: Path) -> None:
     src.write_text(json.dumps(make_engagement()), encoding="utf-8")
     result = runner.invoke(app, ["view", str(src), "-o", str(tmp_path / "no" / "dir" / "o.html")])
     assert result.exit_code == 1
+
+
+def test_viewer_injects_disclaimer_constant_not_file_value() -> None:
+    from adoptionkit.models import DISCLAIMER
+
+    html = render_html(_eng())
+    m = re.search(r'<script type="application/json" id="disclaimer-data">(.*?)</script>', html, re.S)
+    assert m is not None
+    assert json.loads(m.group(1)) == DISCLAIMER
+    assert "g.disclaimer" not in html
+    assert "disclaimer-data" in html

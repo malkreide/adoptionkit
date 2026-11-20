@@ -278,6 +278,7 @@
           "title": "Evaluated On"
         },
         "disclaimer": {
+          "const": "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären.",
           "default": "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären.",
           "title": "Disclaimer",
           "type": "string"

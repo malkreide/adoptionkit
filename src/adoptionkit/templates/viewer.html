@@ -57,10 +57,12 @@ tr:target td { outline: 2px solid var(--link); outline-offset: -2px; }
 <body>
 <main id="app"></main>
 <script type="application/json" id="engagement-data">/*__ENGAGEMENT_JSON__*/null</script>
+<script type="application/json" id="disclaimer-data">/*__DISCLAIMER_JSON__*/null</script>
 <script>
 (function () {
   "use strict";
   var data = JSON.parse(document.getElementById("engagement-data").textContent);
+  var disclaimer = JSON.parse(document.getElementById("disclaimer-data").textContent);
   var app = document.getElementById("app");
 
   var PHASE = { discovery: "Entdeckung", prototype: "Prototyp", value_proof: "Wertnachweis",
@@ -204,7 +206,7 @@ tr:target td { outline: 2px solid var(--link); outline-offset: -2px; }
           badge(label(ANSWER, c.answer), cls(ANSWER_CLASS, c.answer), c.answer), links]);
       })));
     }
-    box.appendChild(el("p", g.disclaimer, "disclaimer"));
+    box.appendChild(el("p", disclaimer, "disclaimer"));
     app.appendChild(box);
   });
 

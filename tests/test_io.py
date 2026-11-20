@@ -291,3 +291,14 @@ def test_cli_view_surrogate_in_memory_gives_message(tmp_path: Path, monkeypatch:
     result = CliRunner().invoke(cli.app, ["view", str(f), "-o", str(tmp_path / "o.html")])
     assert result.exit_code == 1
     assert not (tmp_path / "o.html").exists()
+
+
+def test_validate_rejects_altered_disclaimer() -> None:
+    from adoptionkit.models import DISCLAIMER
+
+    gate = {"id": "G0", "title": "t", "checks": [], "disclaimer": "Alles rechtssicher."}
+    issues = validate_data(make_engagement(gates=[gate]))
+    assert issues and any(i.path == "gates/0/disclaimer" for i in issues)
+    assert DISCLAIMER not in "Alles rechtssicher."
+    gate["disclaimer"] = ""
+    assert validate_data(make_engagement(gates=[gate]))

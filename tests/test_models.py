@@ -52,5 +52,11 @@ def test_gate_disclaimer_default():
     )
 
 
+def test_gate_disclaimer_must_be_exact():
+    for bad in ("", "anders", DISCLAIMER + " "):
+        with pytest.raises(ValidationError):
+            Gate.model_validate({"id": "G0", "title": "t", "disclaimer": bad})
+
+
 def test_phase_order():
     assert PHASE_ORDER[0] == "discovery" and len(PHASE_ORDER) == 5
