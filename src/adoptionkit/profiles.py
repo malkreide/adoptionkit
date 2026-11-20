@@ -66,7 +66,8 @@ def load_profile(name: str) -> Profile:
     """Load a bundled profile by name. Never touches arbitrary filesystem paths."""
     if not _NAME.fullmatch(name) or name not in _available():
         raise AdoptionkitError(
-            f"Profil «{name}» nicht gefunden. Verfügbar: {', '.join(_available())}"
+            f"Profil «{name}» nicht gefunden. Verfügbar: {', '.join(_available())}. "
+            "Eigene Profile mit --profile <pfad> angeben."
         )
     resource = resources.files("adoptionkit") / "profiles" / f"{name}.yaml"
     return _parse(resource.read_text(encoding="utf-8"), name)

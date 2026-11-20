@@ -302,3 +302,11 @@ def test_validate_rejects_altered_disclaimer() -> None:
     assert DISCLAIMER not in "Alles rechtssicher."
     gate["disclaimer"] = ""
     assert validate_data(make_engagement(gates=[gate]))
+
+
+def test_check_id_prefix_must_match_gate_id() -> None:
+    gate = {"id": "G0", "title": "t", "checks": [check("G3-01")]}
+    issues = validate_data(make_engagement(gates=[gate]))
+    assert [i.path for i in issues] == ["gates/0/checks/0/id"]
+    ok = {"id": "G3", "title": "t", "checks": [check("G3-01")]}
+    assert validate_data(make_engagement(gates=[ok])) == []

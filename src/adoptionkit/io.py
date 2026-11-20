@@ -121,6 +121,13 @@ def _integrity_issues(eng: Engagement) -> list[ValidationIssue]:
     for gi, gate in enumerate(eng.gates):
         issues += _duplicates([c.id for c in gate.checks], f"gates/{gi}/checks")
         for ci, chk in enumerate(gate.checks):
+            if not chk.id.startswith(f"{gate.id}-"):
+                issues.append(
+                    ValidationIssue(
+                        f"gates/{gi}/checks/{ci}/id",
+                        f"Check {chk.id} gehört nicht zu Gate {gate.id}",
+                    )
+                )
             for ri, ref in enumerate(chk.atom_refs):
                 if ref not in atom_ids:
                     path = f"gates/{gi}/checks/{ci}/atom_refs/{ri}"

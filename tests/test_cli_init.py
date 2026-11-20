@@ -99,3 +99,9 @@ def test_init_target_is_regular_file(tmp_path: Path) -> None:
     result = runner.invoke(app, ["init", str(f)])
     assert result.exit_code == 1
     assert "Traceback" not in result.output
+
+
+def test_init_default_id_transliterates_umlauts(tmp_path: Path) -> None:
+    target = tmp_path / "Ärger Dossier Öl Über"
+    assert runner.invoke(app, ["init", str(target)]).exit_code == 0
+    assert _load(target)["meta"]["id"] == "aerger-dossier-oel-ueber"

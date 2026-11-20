@@ -45,7 +45,7 @@ def test_lint_error_exit_1_text(tmp_path: Path) -> None:
     result = runner.invoke(app, ["lint", str(f)])
     assert result.exit_code == 1
     assert "L001 error atoms/A-001: " in result.output
-    assert "1 Befunde (1 error, 0 warning)" in result.output
+    assert "1 Befund (1 error, 0 warning)" in result.output
 
 
 def test_lint_warning_only_exit_0(tmp_path: Path) -> None:
@@ -54,7 +54,7 @@ def test_lint_warning_only_exit_0(tmp_path: Path) -> None:
     result = runner.invoke(app, ["lint", str(f)])
     assert result.exit_code == 0
     assert "L003 warning measures/M-001: " in result.output
-    assert "1 Befunde (0 error, 1 warning)" in result.output
+    assert "1 Befund (0 error, 1 warning)" in result.output
 
 
 def test_lint_json(tmp_path: Path) -> None:

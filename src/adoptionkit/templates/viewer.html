@@ -149,7 +149,8 @@ tr:target td { outline: 2px solid var(--link); outline-offset: -2px; }
   app.appendChild(el("h1", data.meta.title));
   app.appendChild(metaLine("Auftraggeberin", data.parties.client));
   app.appendChild(metaLine("Auftragnehmerin", data.parties.contractor));
-  app.appendChild(metaLine("Lösung", data.solution.name + " (" + data.solution.vendor + ")"));
+  app.appendChild(metaLine("Lösung", data.solution.name));
+  if (data.solution.vendor) { app.appendChild(metaLine("Anbieter", data.solution.vendor)); }
 
   // Phasen
   section("Phasen");

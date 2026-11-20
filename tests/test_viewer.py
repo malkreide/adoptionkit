@@ -78,6 +78,12 @@ def test_title_is_escaped() -> None:
     assert "<title>&lt;b&gt;&amp;&quot;x&quot;</title>" in html
 
 
+def test_viewer_vendor_has_no_double_parentheses() -> None:
+    t = _template()
+    assert '" (" + data.solution.vendor + ")"' not in t
+    assert "Anbieter" in t
+
+
 def test_cli_view_writes_file(tmp_path: Path) -> None:
     src = tmp_path / "engagement.json"
     src.write_text(json.dumps(make_engagement()), encoding="utf-8")

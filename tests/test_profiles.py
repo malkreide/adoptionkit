@@ -31,6 +31,11 @@ def test_unknown_profile_lists_available() -> None:
         load_profile("does-not-exist")
 
 
+def test_unknown_profile_hints_at_profile_path() -> None:
+    with pytest.raises(AdoptionkitError, match="--profile <pfad>"):
+        load_profile("does-not-exist")
+
+
 def test_disclaimer_required(tmp_path: Path) -> None:
     raw = yaml.safe_load(
         (Path(__file__).parents[1] / "src/adoptionkit/profiles/generic.yaml").read_text("utf-8")

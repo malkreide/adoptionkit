@@ -110,7 +110,8 @@ def lint(
     else:
         for f in findings:
             typer.echo(f"{f.code} {f.severity} {f.path}: {f.message}")
-        typer.echo(f"{len(findings)} Befunde ({errors} error, {warnings} warning)")
+        noun = "Befund" if len(findings) == 1 else "Befunde"
+        typer.echo(f"{len(findings)} {noun} ({errors} error, {warnings} warning)")
     if errors:
         raise typer.Exit(1)
 
@@ -164,8 +165,14 @@ def gate(
     typer.echo(DISCLAIMER)
 
 
+_UMLAUTS = str.maketrans(
+    {"ä": "ae", "ö": "oe", "ü": "ue", "Ä": "Ae", "Ö": "Oe", "Ü": "Ue"}
+)
+
+
 def _default_id(folder: Path) -> str:
-    slug = re.sub(r"[^a-z0-9-]", "-", folder.resolve().name.lower()).strip("-")
+    name = folder.resolve().name.translate(_UMLAUTS).lower()
+    slug = re.sub(r"[^a-z0-9-]", "-", name).strip("-")
     return slug or "engagement"
 
 
