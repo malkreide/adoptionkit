@@ -195,3 +195,99 @@ def test_load_engagement_invalid_message_has_umlaut(tmp_path: Path) -> None:
     f.write_text(json.dumps(make_engagement(atoms=[atom("A-001"), atom("A-001")])))
     with pytest.raises(AdoptionkitError, match="ungültig"):
         load_engagement(f)
+
+
+# --- UTF-8 encodability and atomic save ---
+
+SURROGATE_TITLE = "bad " + chr(0xD800)
+
+
+def _surrogate_file(tmp_path: Path) -> Path:
+    data = make_engagement()
+    data["meta"]["title"] = SURROGATE_TITLE
+    f = tmp_path / "s.json"
+    f.write_text(json.dumps(data), encoding="utf-8")  # ensure_ascii: stored as \ud800 escape
+    return f
+
+
+def test_validate_reports_unencodable_string(tmp_path: Path) -> None:
+    issues = validate_data(load_json(_surrogate_file(tmp_path)))
+    assert [i.path for i in issues] == ["meta/title"]
+    assert "UTF-8" in issues[0].message
+
+
+def test_validate_reports_unencodable_key(tmp_path: Path) -> None:
+    data = make_engagement()
+    data["thresholds_" + chr(0xD800)] = 1
+    issues = validate_data(data)
+    assert any("UTF-8" in i.message for i in issues)
+
+
+def test_cli_validate_rejects_surrogate(tmp_path: Path) -> None:
+    from typer.testing import CliRunner
+
+    from adoptionkit.cli import app
+
+    result = CliRunner().invoke(app, ["validate", str(_surrogate_file(tmp_path))])
+    assert result.exit_code == 1
+    assert "UTF-8" in result.output
+
+
+def test_cli_gate_on_surrogate_leaves_file_identical(tmp_path: Path) -> None:
+    from typer.testing import CliRunner
+
+    from adoptionkit.cli import app
+
+    f = _surrogate_file(tmp_path)
+    before = f.read_bytes()
+    result = CliRunner().invoke(app, ["gate", str(f), "G0", "--today", "2026-05-04"])
+    assert result.exit_code == 1
+    assert f.read_bytes() == before
+
+
+def test_save_failure_keeps_original_and_removes_temp(tmp_path: Path) -> None:
+    from adoptionkit.models import Engagement
+
+    target = tmp_path / "e.json"
+    target.write_text('{"keep": "me"}\n', encoding="utf-8")
+    data = make_engagement()
+    data["meta"]["title"] = SURROGATE_TITLE
+    eng = Engagement.model_validate(data)
+    with pytest.raises(UnicodeEncodeError):
+        save_engagement(eng, target)
+    assert target.read_text(encoding="utf-8") == '{"keep": "me"}\n'
+    assert [p.name for p in tmp_path.iterdir()] == ["e.json"]
+
+
+def test_save_replace_failure_removes_temp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import os
+
+    from adoptionkit.models import Engagement
+
+    target = tmp_path / "e.json"
+    target.write_text("orig\n", encoding="utf-8")
+
+    def boom(*_a: Any, **_k: Any) -> None:
+        raise OSError("boom")
+
+    monkeypatch.setattr(os, "replace", boom)
+    with pytest.raises(OSError):
+        save_engagement(Engagement.model_validate(make_engagement()), target)
+    assert target.read_text(encoding="utf-8") == "orig\n"
+    assert [p.name for p in tmp_path.iterdir()] == ["e.json"]
+
+
+def test_cli_view_surrogate_in_memory_gives_message(tmp_path: Path, monkeypatch: Any) -> None:
+    from typer.testing import CliRunner
+
+    import adoptionkit.cli as cli
+
+    def boom(_eng: Any) -> str:
+        raise UnicodeEncodeError("utf-8", "x", 0, 1, "surrogates not allowed")
+
+    f = tmp_path / "e.json"
+    f.write_text(json.dumps(make_engagement()), encoding="utf-8")
+    monkeypatch.setattr(cli, "render_html", boom)
+    result = CliRunner().invoke(cli.app, ["view", str(f), "-o", str(tmp_path / "o.html")])
+    assert result.exit_code == 1
+    assert not (tmp_path / "o.html").exists()

@@ -228,6 +228,8 @@ def view(
         raise _fail(str(exc)) from exc
     try:
         output.write_text(render_html(eng), encoding="utf-8")
+    except (UnicodeError, ValueError) as exc:
+        raise _fail(f"{output}: Inhalt nicht als UTF-8 darstellbar: {exc}") from exc
     except OSError as exc:
         raise _fail(f"{output}: nicht schreibbar: {exc}") from exc
     typer.echo(str(output))

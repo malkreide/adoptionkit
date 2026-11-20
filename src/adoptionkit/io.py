@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
@@ -54,9 +56,35 @@ def _fmt_path(parts: Any) -> str:
     return "/".join(items) if items else "(root)"
 
 
+def _encoding_issues(node: Any, path: tuple[str, ...] = ()) -> list[ValidationIssue]:
+    """Report strings (values and keys) that cannot be written as UTF-8, e.g. lone surrogates."""
+    out: list[ValidationIssue] = []
+    message = "Text ist nicht als UTF-8 kodierbar (z. B. einzelnes Surrogat-Zeichen)"
+
+    def bad(text: str) -> bool:
+        try:
+            text.encode("utf-8")
+        except UnicodeEncodeError:
+            return True
+        return False
+
+    if isinstance(node, str):
+        if bad(node):
+            out.append(ValidationIssue(_fmt_path(path), message))
+    elif isinstance(node, dict):
+        for key, value in node.items():
+            if bad(str(key)):
+                out.append(ValidationIssue(_fmt_path(path + (str(key),)), message + " (Schlüssel)"))
+            out += _encoding_issues(value, path + (str(key),))
+    elif isinstance(node, list):
+        for idx, value in enumerate(node):
+            out += _encoding_issues(value, path + (str(idx),))
+    return out
+
+
 def validate_data(data: dict[str, Any]) -> list[ValidationIssue]:
     validator = Draft202012Validator(load_schema(), format_checker=FormatChecker())
-    issues = [
+    issues = _encoding_issues(data) + [
         ValidationIssue(_fmt_path(e.absolute_path), e.message) for e in validator.iter_errors(data)
     ]
     if not issues:
@@ -131,5 +159,21 @@ def load_engagement(path: str | Path) -> Engagement:
 
 
 def save_engagement(eng: Engagement, path: str | Path) -> None:
+    """Write atomically: serialise and encode first, then temp file and os.replace.
+
+    On any failure the original file stays untouched and the temp file is removed.
+    """
     text = json.dumps(eng.model_dump(mode="json", exclude_none=True), indent=2, ensure_ascii=False)
-    Path(path).write_text(text + "\n", encoding="utf-8")
+    payload = (text + chr(10)).encode("utf-8")
+    target = Path(path)
+    fd, tmp_name = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(payload)
+        os.replace(tmp_name, target)
+    except BaseException:
+        try:
+            os.unlink(tmp_name)
+        except OSError:
+            pass
+        raise
