@@ -24,3 +24,18 @@ Stufe 0 (Skelett), Stand 2026-11-20.
 - CI (GitHub Actions), Dependabot und Repo-Metadaten.
 - Repo-Regeltests: keine Eszett-Schreibung, keine Rollenbezeichnung aus den Quellen ausserhalb der
   Quellenliste, keine Netzwerk-Importe in `src/`, Lizenzhalterin in `LICENSE`.
+
+### Fixed
+
+- `gate` kann die Datei nicht mehr leeren: atomares Speichern (Temporärdatei und `os.replace`);
+  `validate` meldet nicht als UTF-8 kodierbare Texte; `view` meldet Kodierfehler mit Exit-Code 1.
+- Hinweistext der Gates im Schema fixiert (abweichende Werte sind ungültig); der Viewer setzt die
+  Konstante ein und liest den Text nicht aus der Datei.
+- L007 wertet Gates frisch aus statt dem gespeicherten Ergebnis zu trauen; `Finding.gate_id`
+  ersetzt den Textvergleich im R9-Filter.
+- Check-ID-Präfix muss zum Gate passen; Standard-ID von `init` wandelt Umlaute um
+  («Ärger» wird «aerger»); Hinweis auf `--profile <pfad>` bei unbekanntem Profil; «1 Befund»
+  im Singular; Viewer zeigt Anbieter ohne doppelte Klammern.
+- README-Schnellstart kopiert das Beispiel vor `gate`.
+- CI: Wheel-Job prüft, dass Schema, Profile und Vorlagen im Paket enthalten sind;
+  Netzwerk-Import-Regeltest arbeitet über den AST.
