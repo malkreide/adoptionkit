@@ -22,7 +22,7 @@ Nie globales ruff verwenden, nie ins System-Python installieren.
 ## Grenzen
 
 - Keine Netzwerkzugriffe, keine Modellaufrufe, keine Telemetrie in `src/`.
-- Bezeichner Englisch. Deutsche Texte in Schweizer Rechtschreibung: nie «ß», immer «ss».
+- Bezeichner Englisch. Deutsche Texte in Schweizer Rechtschreibung: nie das Eszett, immer «ss».
 - Gates sind Arbeitshilfen, nie ein rechtliches Urteil.
 - Beispiel- und Testdaten sind synthetisch und so beschriftet.
 

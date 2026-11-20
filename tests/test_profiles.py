@@ -54,9 +54,9 @@ def test_every_source_ref_exists_in_sources() -> None:
 def test_no_sharp_s_in_questions() -> None:
     p = load_profile("generic")
     for gate in p.gates.values():
-        assert "ß" not in gate.title
+        assert "00df" not in gate.title
         for c in gate.checks:
-            assert "ß" not in c.question
+            assert "00df" not in c.question
 
 
 def test_gate_from_profile() -> None:

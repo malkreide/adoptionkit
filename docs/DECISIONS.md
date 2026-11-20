@@ -32,7 +32,7 @@ Ablage `skills/ai-rollout/SKILL.md`. Der Name beschreibt die Tätigkeit und ist 
 ## E4 – Sprache
 
 - Bezeichner in Code und Schema: Englisch.
-- Checklisten-Texte und Doku: Deutsch, Schweizer Rechtschreibung (ss statt ß).
+- Checklisten-Texte und Doku: Deutsch, Schweizer Rechtschreibung (Doppel-s statt Eszett).
 - README zweisprachig: `README.md` (EN), `README.de.md` (DE).
 
 ## Weitere Entscheide in Stufe 0
