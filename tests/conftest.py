@@ -16,7 +16,7 @@ def make_engagement(**overrides: Any) -> dict[str, Any]:
             "created": "2026-01-01",
             "updated": "2026-01-02",
             "schema_version": "0.1",
-            "profile": "default",
+            "profile": "generic",
             "synthetic": True,
         },
         "parties": {"client": "Synthetic Client", "contractor": "Synthetic Contractor"},

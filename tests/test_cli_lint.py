@@ -79,3 +79,34 @@ def test_lint_schema_issues_exit_1(tmp_path: Path) -> None:
     f.write_text(json.dumps({"meta": {}}), encoding="utf-8")
     result = runner.invoke(app, ["lint", str(f)])
     assert result.exit_code == 1
+
+
+def _running_discovery() -> dict[str, Any]:
+    return {"id": "discovery", "budget_days": 1, "status": "running"}
+
+
+def test_lint_uses_profile_from_meta_l007(tmp_path: Path) -> None:
+    f = _write(tmp_path, phases=[_running_discovery()])
+    result = runner.invoke(app, ["lint", str(f)])
+    assert result.exit_code == 1
+    assert "L007 error phases/discovery: " in result.output
+
+
+def test_lint_unknown_meta_profile_exit_1(tmp_path: Path) -> None:
+    data = make_engagement()
+    data["meta"]["profile"] = "gibt-es-nicht"
+    f = tmp_path / "e.json"
+    f.write_text(json.dumps(data), encoding="utf-8")
+    result = runner.invoke(app, ["lint", str(f)])
+    assert result.exit_code == 1
+    assert "gibt-es-nicht" in result.output
+    assert "Traceback" not in result.output
+
+
+def test_lint_profile_option_overrides_meta(tmp_path: Path) -> None:
+    data = make_engagement(phases=[_running_discovery()])
+    data["meta"]["profile"] = "gibt-es-nicht"
+    f = tmp_path / "e.json"
+    f.write_text(json.dumps(data), encoding="utf-8")
+    result = runner.invoke(app, ["lint", str(f), "--profile", "generic"])
+    assert "L007 error" in result.output
