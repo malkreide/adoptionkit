@@ -1,0 +1,8 @@
+description: "Evidence-based adoption of an AI solution in an organisation: evidence atoms, gates as YAML checklists, lints, single-file viewer and a Claude skill."
+topics:
+  - ai-adoption
+  - evidence-based
+  - public-sector
+  - claude-skill
+  - python
+  - json-schema
