@@ -1,5 +1,6 @@
 """Command-line entry point for adoptionkit."""
 
+import sys
 from pathlib import Path
 
 import typer
@@ -49,4 +50,8 @@ def validate(file: Path = typer.Argument(..., help="Engagement-Datei (JSON).")) 
 
 
 def main() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8")
     app()
