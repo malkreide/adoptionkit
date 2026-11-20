@@ -1,5 +1,6 @@
 """Repository rules: spelling, vocabulary, no network imports, licence holder."""
 
+import ast
 import re
 import subprocess
 from pathlib import Path
@@ -17,7 +18,7 @@ def _tracked_files() -> list[Path]:
             ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True
         ).stdout
     except (OSError, subprocess.CalledProcessError):
-        pytest.skip("git ist nicht verfuegbar")
+        pytest.skip("git ist nicht verfügbar")
     return [ROOT / line for line in out.splitlines() if line]
 
 
@@ -57,15 +58,44 @@ def test_role_title_only_in_sources_and_bauplan() -> None:
     assert offenders == []
 
 
+NETWORK_MODULES = {
+    "socket", "ssl", "urllib", "http", "requests", "httpx", "ftplib", "smtplib", "telnetlib",
+    "xmlrpc",
+}
+
+
+def _network_offences(source: str) -> list[str]:
+    found = []
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found += [a.name for a in node.names if a.name.split(".")[0] in NETWORK_MODULES]
+        elif isinstance(node, ast.ImportFrom):
+            if node.level == 0 and (node.module or "").split(".")[0] in NETWORK_MODULES:
+                found.append(node.module or "")
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "__import__"
+        ):
+            found.append("__import__")
+    return found
+
+
+def test_network_check_detects_offences() -> None:
+    assert _network_offences("import os, socket") == ["socket"]
+    assert _network_offences("from urllib.request import urlopen") == ["urllib.request"]
+    assert _network_offences("def f():" + chr(10) + "    import requests as r") == ["requests"]
+    assert _network_offences("__import__('http.client')") == ["__import__"]
+    assert _network_offences("from . import http" + chr(10) + "import json") == []
+
+
 def test_no_network_imports_in_src() -> None:
-    pattern = re.compile(
-        r"^\s*(?:import|from)\s+(socket|urllib|http|requests|httpx)\b", re.MULTILINE
-    )
-    offenders = []
+    offenders = {}
     for path in (ROOT / "src").rglob("*.py"):
-        if pattern.search(path.read_text(encoding="utf-8")):
-            offenders.append(_rel(path))
-    assert offenders == []
+        found = _network_offences(path.read_text(encoding="utf-8"))
+        if found:
+            offenders[_rel(path)] = found
+    assert offenders == {}
 
 
 def test_license_names_holder() -> None:
