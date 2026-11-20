@@ -1,0 +1,381 @@
+{
+  "meta": {
+    "id": "seewil-askdesk",
+    "title": "Synthetischer Beispielfall: AskDesk in den Einwohnerdiensten Seewil",
+    "created": "2026-09-01",
+    "updated": "2026-11-16",
+    "schema_version": "0.1",
+    "profile": "generic",
+    "synthetic": true
+  },
+  "parties": {
+    "client": "Gemeinde Seewil (fiktiv)",
+    "contractor": "Beispiel Beratung GmbH (fiktiv)"
+  },
+  "solution": {
+    "name": "AskDesk",
+    "vendor": "Beispiel Software AG (fiktiv)",
+    "hosting_model": "saas",
+    "data_location": "Schweiz",
+    "config_limits": [
+      "Wissensbasis, Tonalität und Eskalationsregeln konfigurierbar",
+      "Keine Anbindung an Fachanwendungen",
+      "Keine eigenen Formularmodule"
+    ]
+  },
+  "atoms": [
+    {
+      "id": "A-001",
+      "type": "requirement",
+      "statement": "Standardanfragen (Wohnsitzbestätigung, Umzug, Adressänderung) sollen innerhalb von fünf Arbeitstagen beantwortet werden.",
+      "source": {
+        "kind": "interview",
+        "ref": "evidence/interview-einwohnerdienste.md",
+        "date": "2026-08-25"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-002",
+      "type": "usage_signal",
+      "statement": "Rund 1200 Anfragen pro Monat, davon etwa 60 Prozent Standardfragen.",
+      "source": {
+        "kind": "analytics",
+        "ref": "evidence/auswertung-anfragevolumen.md",
+        "date": "2026-07-10"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-003",
+      "type": "constraint",
+      "statement": "Datenhaltung ausschliesslich in der Schweiz; Bearbeitung im Auftrag nach schriftlicher Vereinbarung.",
+      "source": {
+        "kind": "document",
+        "ref": "evidence/dokument-datenschutzvereinbarung.md",
+        "date": "2026-08-28"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-004",
+      "type": "data_source",
+      "statement": "Es werden keine Einwohnerregister-Auszüge übergeben, nur öffentliche FAQ-Texte.",
+      "source": {
+        "kind": "document",
+        "ref": "evidence/dokument-datenschutzvereinbarung.md",
+        "date": "2026-08-28"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-005",
+      "type": "risk",
+      "statement": "Eine falsche Auskunft zu Fristen kann zu Beschwerden und Rückfragen führen.",
+      "source": {
+        "kind": "interview",
+        "ref": "evidence/interview-einwohnerdienste.md",
+        "date": "2026-08-25"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-006",
+      "type": "requirement",
+      "statement": "Antworten sollen auch auf Englisch verfügbar sein.",
+      "source": {
+        "kind": "workshop",
+        "ref": "evidence/workshop-anforderungen.md",
+        "date": "2026-09-02"
+      },
+      "status": "assumed"
+    },
+    {
+      "id": "A-007",
+      "type": "decision",
+      "statement": "Für nicht abgedeckte Online-Formulare wird ein eigenes Modul entwickelt, statt auf die Produktplanung des Herstellers zu warten.",
+      "source": {
+        "kind": "workshop",
+        "ref": "evidence/workshop-anforderungen.md",
+        "date": "2026-09-02"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-008",
+      "type": "constraint",
+      "statement": "AskDesk erlaubt nur Konfiguration von Wissensbasis, Tonalität und Eskalationsregeln; keine Anbindung an Fachanwendungen.",
+      "source": {
+        "kind": "document",
+        "ref": "evidence/dokument-askdesk-leistungsbeschrieb.md",
+        "date": "2026-08-18"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-009",
+      "type": "requirement",
+      "statement": "Unsichere oder heikle Fälle werden an Mitarbeitende weitergegeben.",
+      "source": {
+        "kind": "interview",
+        "ref": "evidence/interview-einwohnerdienste.md",
+        "date": "2026-08-25"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-010",
+      "type": "usage_signal",
+      "statement": "Der Hersteller nennt nur Einsätze in grossen Städten, keine vergleichbare Gemeinde.",
+      "source": {
+        "kind": "document",
+        "ref": "evidence/dokument-askdesk-leistungsbeschrieb.md",
+        "date": "2026-08-18"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-011",
+      "type": "risk",
+      "statement": "Die Sachbearbeitung könnte die Lösung ablehnen.",
+      "source": {
+        "kind": "workshop",
+        "ref": "evidence/workshop-anforderungen.md",
+        "date": "2026-09-02"
+      },
+      "status": "assumed"
+    },
+    {
+      "id": "A-012",
+      "type": "data_source",
+      "statement": "FAQ-Sammlung der Gemeindewebsite mit 85 Seiten als Wissensbasis.",
+      "source": {
+        "kind": "analytics",
+        "ref": "evidence/auswertung-anfragevolumen.md",
+        "date": "2026-07-10"
+      },
+      "status": "evidenced"
+    },
+    {
+      "id": "A-013",
+      "type": "requirement",
+      "statement": "Antworten verweisen auf die passende Seite der Gemeindewebsite.",
+      "source": {
+        "kind": "workshop",
+        "ref": "evidence/workshop-anforderungen.md",
+        "date": "2026-09-02"
+      },
+      "status": "evidenced"
+    }
+  ],
+  "phases": [
+    {
+      "id": "discovery",
+      "budget_days": 5,
+      "start": "2026-09-14",
+      "end": "2026-10-02",
+      "status": "done"
+    },
+    {
+      "id": "prototype",
+      "budget_days": 10,
+      "start": "2026-10-12",
+      "status": "running",
+      "abort_criterion": "Abbruch, wenn die Antwortqualität in der Stichprobe unter dem vereinbarten Minimum liegt oder das Budget aufgebraucht ist."
+    },
+    {
+      "id": "value_proof",
+      "budget_days": 12,
+      "status": "planned",
+      "abort_criterion": "Abbruch, wenn die vereinbarten Schwellenwerte im zweiten Evaluationslauf nicht erreicht werden."
+    },
+    {
+      "id": "hardening",
+      "budget_days": 8,
+      "status": "planned",
+      "abort_criterion": "Abbruch, wenn offene Befunde der Datenschutzprüfung nicht innerhalb der Phase geschlossen werden."
+    },
+    {
+      "id": "handover",
+      "budget_days": 4,
+      "status": "planned",
+      "abort_criterion": "Keine Übergabe, solange die Betriebsverantwortlichen nicht geschult sind."
+    }
+  ],
+  "gates": [
+    {
+      "id": "G0",
+      "title": "Eignung",
+      "checks": [
+        {
+          "id": "G0-01",
+          "question": "Betrifft das Problem eine Kernaufgabe der Organisation, bei der Ausfall oder Verzögerung spürbare Folgen hat?",
+          "answer": "yes",
+          "atom_refs": [
+            "A-001",
+            "A-002"
+          ],
+          "source_ref": "S03"
+        },
+        {
+          "id": "G0-02",
+          "question": "Lässt sich der Ablauf mit Fällen vergleichen, in denen die Lösung bereits im Einsatz ist?",
+          "answer": "no",
+          "atom_refs": [
+            "A-010"
+          ],
+          "source_ref": "S03"
+        },
+        {
+          "id": "G0-03",
+          "question": "Steht der erwartete Nutzen in einem vertretbaren Verhältnis zum Aufwand für Integration und Auflagen?",
+          "answer": "yes",
+          "atom_refs": [
+            "A-002"
+          ],
+          "source_ref": "S03"
+        },
+        {
+          "id": "G0-04",
+          "question": "Deckt die Lösung nach heutigem Kenntnisstand die Anforderungen der Organisation an Datenstandort und Bearbeitung im Auftrag ab?",
+          "answer": "yes",
+          "atom_refs": [
+            "A-003"
+          ],
+          "source_ref": "S03"
+        },
+        {
+          "id": "G0-05",
+          "question": "Lassen sich die bekannten Anforderungen innerhalb der Konfigurationsgrenze der Lösung umsetzen, ohne Neuentwicklung?",
+          "answer": "yes",
+          "atom_refs": [
+            "A-008"
+          ],
+          "source_ref": "S04"
+        }
+      ],
+      "result": "passed",
+      "recommendation": "guided_rollout",
+      "evaluated_on": "2026-09-07",
+      "disclaimer": "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären."
+    },
+    {
+      "id": "G3",
+      "title": "Evaluation",
+      "checks": [
+        {
+          "id": "G3-01",
+          "question": "Liegt ein Eval-Set vor, das aus echten, anonymisierten Fällen der Organisation zusammengestellt ist?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S04"
+        },
+        {
+          "id": "G3-02",
+          "question": "Sind Schwellenwerte für die Evaluation mit der Auftraggeberin vereinbart und schriftlich festgehalten?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S04"
+        },
+        {
+          "id": "G3-03",
+          "question": "Liegt der letzte Evaluationslauf über allen vereinbarten Schwellenwerten?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S04"
+        },
+        {
+          "id": "G3-04",
+          "question": "Ist ein Abbruchkriterium für den Wertnachweis vereinbart?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S05"
+        }
+      ],
+      "disclaimer": "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären."
+    },
+    {
+      "id": "G4",
+      "title": "Übergabe",
+      "checks": [
+        {
+          "id": "G4-01",
+          "question": "Sind die Betriebsverantwortlichen namentlich benannt?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S02"
+        },
+        {
+          "id": "G4-02",
+          "question": "Sind die Betriebsverantwortlichen für den Betrieb der Lösung geschult?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S02"
+        },
+        {
+          "id": "G4-03",
+          "question": "Liegt ein Betriebshandbuch vor, mit dem die Betriebsverantwortlichen ohne Hilfe arbeiten können?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S02"
+        },
+        {
+          "id": "G4-04",
+          "question": "Ist jedes Artefakt im Rückfluss-Register verallgemeinert oder verworfen, sodass keines mehr offen ist?",
+          "answer": "unclear",
+          "atom_refs": [],
+          "source_ref": "S03"
+        }
+      ],
+      "disclaimer": "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären."
+    }
+  ],
+  "measures": [
+    {
+      "id": "M-001",
+      "description": "Wissensbasis aus der FAQ-Sammlung der Website aufbauen und konfigurieren.",
+      "change_type": "configuration",
+      "status": "accepted",
+      "atom_refs": [
+        "A-012",
+        "A-001"
+      ]
+    },
+    {
+      "id": "M-002",
+      "description": "Englische Antwortvorlagen bereitstellen.",
+      "change_type": "template",
+      "status": "proposed",
+      "atom_refs": [
+        "A-006"
+      ]
+    },
+    {
+      "id": "M-003",
+      "description": "Eigenes Modul für Online-Formulare entwickeln.",
+      "change_type": "new_development",
+      "status": "proposed",
+      "atom_refs": [
+        "A-007",
+        "A-008"
+      ],
+      "product_decision_ref": "A-007"
+    },
+    {
+      "id": "M-004",
+      "description": "Eskalationsregel für unsichere Fälle konfigurieren.",
+      "change_type": "configuration",
+      "status": "accepted",
+      "atom_refs": []
+    }
+  ],
+  "evals": {
+    "thresholds": {},
+    "runs": []
+  },
+  "artefacts": [],
+  "handover": {
+    "operators": [],
+    "training_done": false
+  }
+}
