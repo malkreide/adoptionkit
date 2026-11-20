@@ -1,0 +1,61 @@
+name: generic
+version: 1
+title: Generisches Profil
+disclaimer: "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären."
+gates:
+  G0:
+    title: Eignung
+    required_before: discovery
+    checks:
+      - id: G0-01
+        question: "Betrifft das Problem eine Kernaufgabe der Organisation, bei der Ausfall oder Verzögerung spürbare Folgen hat?"
+        source_ref: S03
+        stop_if: "no"
+      - id: G0-02
+        question: "Lässt sich der Ablauf mit Fällen vergleichen, in denen die Lösung bereits im Einsatz ist?"
+        source_ref: S03
+        guided_if: "no"
+      - id: G0-03
+        question: "Steht der erwartete Nutzen in einem vertretbaren Verhältnis zum Aufwand für Integration und Auflagen?"
+        source_ref: S03
+        stop_if: "no"
+      - id: G0-04
+        question: "Deckt die Lösung nach heutigem Kenntnisstand die Anforderungen der Organisation an Datenstandort und Bearbeitung im Auftrag ab?"
+        source_ref: S03
+        stop_if: "no"
+      - id: G0-05
+        question: "Lassen sich die bekannten Anforderungen innerhalb der Konfigurationsgrenze der Lösung umsetzen, ohne Neuentwicklung?"
+        source_ref: S04
+        guided_if: "no"
+  G3:
+    title: Evaluation
+    required_before: value_proof
+    checks:
+      - id: G3-01
+        question: "Liegt ein Eval-Set vor, das aus echten, anonymisierten Fällen der Organisation zusammengestellt ist?"
+        source_ref: S04
+      - id: G3-02
+        question: "Sind Schwellenwerte für die Evaluation mit der Auftraggeberin vereinbart und schriftlich festgehalten?"
+        source_ref: S04
+      - id: G3-03
+        question: "Liegt der letzte Evaluationslauf über allen vereinbarten Schwellenwerten?"
+        source_ref: S04
+      - id: G3-04
+        question: "Ist ein Abbruchkriterium für den Wertnachweis vereinbart?"
+        source_ref: S05
+  G4:
+    title: Übergabe
+    required_to_complete: handover
+    checks:
+      - id: G4-01
+        question: "Sind die Betriebsverantwortlichen namentlich benannt?"
+        source_ref: S02
+      - id: G4-02
+        question: "Sind die Betriebsverantwortlichen für den Betrieb der Lösung geschult?"
+        source_ref: S02
+      - id: G4-03
+        question: "Liegt ein Betriebshandbuch vor, mit dem die Betriebsverantwortlichen ohne Hilfe arbeiten können?"
+        source_ref: S02
+      - id: G4-04
+        question: "Ist jedes Artefakt im Rückfluss-Register verallgemeinert oder verworfen, sodass keines mehr offen ist?"
+        source_ref: S03
