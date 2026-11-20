@@ -8,6 +8,7 @@ from conftest import make_engagement
 
 from adoptionkit.lints import RULES, Finding, lint
 from adoptionkit.models import Engagement
+from adoptionkit.profiles import load_profile
 
 
 def atom(
@@ -39,7 +40,7 @@ def codes(findings: list[Finding], code: str) -> list[Finding]:
 
 
 def test_rules_table() -> None:
-    assert set(RULES) == {"L001", "L002", "L003", "L004", "L005"}
+    assert set(RULES) == {"L001", "L002", "L003", "L004", "L005", "L007"}
     assert RULES["L001"][0] == "error"
     assert RULES["L002"][0] == "warning"
 
@@ -167,3 +168,62 @@ def test_findings_sorted_by_code_then_path() -> None:
     )
     result = lint(e)
     assert [(f.code, f.path) for f in result] == sorted((f.code, f.path) for f in result)
+
+
+# --- L007: Gate-Pflicht vor/zum Abschluss einer Phase ---
+
+
+def _ph(id_: str, status: str) -> dict[str, Any]:
+    return {"id": id_, "budget_days": 1, "status": status, "abort_criterion": "stop"}
+
+
+def _gt(id_: str, result: str | None) -> dict[str, Any]:
+    g: dict[str, Any] = {"id": id_, "title": "t", "checks": []}
+    if result is not None:
+        g["result"] = result
+    return g
+
+
+def test_l007_running_phase_without_gate() -> None:
+    e = eng(phases=[_ph("discovery", "running")])
+    f = codes(lint(e, load_profile("generic")), "L007")
+    assert len(f) == 1
+    assert f[0].severity == "error"
+    assert f[0].path == "phases/discovery"
+    assert "G0" in f[0].message
+
+
+def test_l007_done_phase_with_open_gate() -> None:
+    e = eng(phases=[_ph("discovery", "done")], gates=[_gt("G0", "open")])
+    assert len(codes(lint(e, load_profile("generic")), "L007")) == 1
+
+
+def test_l007_passed_gate_ok() -> None:
+    e = eng(phases=[_ph("discovery", "running")], gates=[_gt("G0", "passed")])
+    assert codes(lint(e, load_profile("generic")), "L007") == []
+
+
+def test_l007_planned_phase_ok() -> None:
+    e = eng(phases=[_ph("discovery", "planned")])
+    assert codes(lint(e, load_profile("generic")), "L007") == []
+
+
+def test_l007_aborted_phase_ok() -> None:
+    e = eng(phases=[_ph("discovery", "aborted")])
+    assert codes(lint(e, load_profile("generic")), "L007") == []
+
+
+def test_l007_required_to_complete() -> None:
+    p = load_profile("generic")
+    running = eng(phases=[_ph("handover", "running")])
+    assert codes(lint(running, p), "L007") == []
+    done = eng(phases=[_ph("handover", "done")])
+    f = codes(lint(done, p), "L007")
+    assert len(f) == 1 and "G4" in f[0].message and f[0].path == "phases/handover"
+    ok = eng(phases=[_ph("handover", "done")], gates=[_gt("G4", "passed")])
+    assert codes(lint(ok, p), "L007") == []
+
+
+def test_l007_without_profile_not_checked() -> None:
+    e = eng(phases=[_ph("discovery", "running")])
+    assert codes(lint(e), "L007") == []
