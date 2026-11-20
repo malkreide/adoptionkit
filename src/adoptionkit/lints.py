@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from datetime import date
 from typing import TYPE_CHECKING, Literal
 
-from adoptionkit.models import PHASE_ORDER, Engagement
+from adoptionkit.models import PHASE_ORDER, Engagement, GateId
 
 if TYPE_CHECKING:
     from adoptionkit.profiles import Profile
@@ -20,8 +20,9 @@ class Finding:
     severity: Severity
     path: str
     message: str
+    gate_id: str | None = None
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, str | None]:
         return asdict(self)
 
 
@@ -35,8 +36,21 @@ RULES: dict[str, tuple[Severity, str]] = {
 }
 
 
-def _finding(code: str, path: str, message: str) -> Finding:
-    return Finding(code, RULES[code][0], path, message)
+def _finding(code: str, path: str, message: str, gate_id: str | None = None) -> Finding:
+    return Finding(code, RULES[code][0], path, message, gate_id)
+
+
+def _gate_passed(eng: Engagement, profile: Profile, gate_id: GateId) -> bool:
+    """Evaluate the gate freshly from its checks; the stored `result` is never trusted.
+
+    Imported locally: `gates` imports `lints` at module level, so a top-level import here
+    would be circular. The evaluation stays in `gates` (single implementation).
+    """
+    from adoptionkit.gates import evaluate_gate
+
+    if eng.gate(gate_id) is None:
+        return False
+    return evaluate_gate(eng, profile, gate_id).result == "passed"
 
 
 def lint(
@@ -89,8 +103,7 @@ def lint(
 
     if profile is not None:
         for gate_id, gdef in profile.gates.items():
-            gate = eng.gate(gate_id)
-            passed = gate is not None and gate.result == "passed"
+            passed = _gate_passed(eng, profile, gate_id)
             if gdef.required_before is not None:
                 p = eng.phase(gdef.required_before)
                 if p is not None and p.status in ("running", "done") and not passed:
@@ -99,6 +112,7 @@ def lint(
                             "L007",
                             f"phases/{p.id}",
                             f"Phase {p.id} ist {p.status}, aber Gate {gate_id} ist nicht bestanden.",
+                            gate_id,
                         )
                     )
             if gdef.required_to_complete is not None:
@@ -109,6 +123,7 @@ def lint(
                             "L007",
                             f"phases/{p.id}",
                             f"Phase {p.id} ist abgeschlossen, aber Gate {gate_id} ist nicht bestanden.",
+                            gate_id,
                         )
                     )
 

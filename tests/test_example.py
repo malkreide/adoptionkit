@@ -9,6 +9,7 @@ import pytest
 from adoptionkit.gates import evaluate_gate
 from adoptionkit.io import load_engagement, load_json, validate_data
 from adoptionkit.lints import lint
+from adoptionkit.models import Engagement
 from adoptionkit.profiles import load_profile
 
 EXAMPLE = Path(__file__).parents[1] / "examples" / "synthetic-municipality"
@@ -63,3 +64,15 @@ def test_atom_source_refs_exist() -> None:
 @pytest.mark.parametrize("name", ["README.md"])
 def test_readme_exists(name: str) -> None:
     assert (EXAMPLE / name).is_file()
+
+
+def test_example_l007_with_unclear_answers_despite_stored_passed() -> None:
+    data = load_json(ENGAGEMENT)
+    for gate in data["gates"]:
+        if gate["id"] == "G0":
+            for c in gate["checks"]:
+                c["answer"] = "unclear"
+            assert gate["result"] == "passed"
+    eng = Engagement.model_validate(data)
+    findings = [f for f in lint(eng, load_profile(eng.meta.profile)) if f.code == "L007"]
+    assert [f.gate_id for f in findings] == ["G0"]

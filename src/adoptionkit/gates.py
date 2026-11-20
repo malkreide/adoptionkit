@@ -82,11 +82,10 @@ def run_gate(
     eng: Engagement, profile: Profile, gate_id: GateId, today: date
 ) -> tuple[Engagement, GateEvaluation]:
     evaluation = evaluate_gate(eng, profile, gate_id)  # R1 before lint
-    own = f"Gate {gate_id} "
     errors = [
         f
         for f in lint(eng, profile, today)
-        if f.severity == "error" and not (f.code == "L007" and own in f.message)
+        if f.severity == "error" and not (f.code == "L007" and f.gate_id == gate_id)
     ]
     if errors:
         raise GateBlocked(errors)

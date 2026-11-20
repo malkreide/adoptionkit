@@ -53,6 +53,7 @@ def test_finding_to_dict() -> None:
         "severity": "error",
         "path": "atoms/A-001",
         "message": "m",
+        "gate_id": None,
     }
 
 
@@ -196,6 +197,17 @@ def _gt(id_: str, result: str | None) -> dict[str, Any]:
     return g
 
 
+def _real_gate(id_: str, answer: str = "n/a", stored: str = "passed", refs: Any = None):
+    """Gate with one check per profile definition; stored result may disagree with the checks."""
+    gdef = load_profile("generic").gates[id_]  # type: ignore[index]
+    checks = [
+        {"id": c.id, "question": "q", "answer": answer, "atom_refs": refs or [],
+         "source_ref": c.source_ref}
+        for c in gdef.checks
+    ]
+    return {"id": id_, "title": "t", "checks": checks, "result": stored}
+
+
 def test_l007_running_phase_without_gate() -> None:
     e = eng(phases=[_ph("discovery", "running")])
     f = codes(lint(e, load_profile("generic")), "L007")
@@ -211,7 +223,7 @@ def test_l007_done_phase_with_open_gate() -> None:
 
 
 def test_l007_passed_gate_ok() -> None:
-    e = eng(phases=[_ph("discovery", "running")], gates=[_gt("G0", "passed")])
+    e = eng(phases=[_ph("discovery", "running")], gates=[_real_gate("G0")])
     assert codes(lint(e, load_profile("generic")), "L007") == []
 
 
@@ -232,10 +244,34 @@ def test_l007_required_to_complete() -> None:
     done = eng(phases=[_ph("handover", "done")])
     f = codes(lint(done, p), "L007")
     assert len(f) == 1 and "G4" in f[0].message and f[0].path == "phases/handover"
-    ok = eng(phases=[_ph("handover", "done")], gates=[_gt("G4", "passed")])
+    ok = eng(phases=[_ph("handover", "done")], gates=[_real_gate("G4")])
     assert codes(lint(ok, p), "L007") == []
 
 
 def test_l007_without_profile_not_checked() -> None:
     e = eng(phases=[_ph("discovery", "running")])
     assert codes(lint(e), "L007") == []
+
+
+def test_l007_ignores_stored_result_unclear_answers() -> None:
+    e = eng(phases=[_ph("discovery", "running")], gates=[_real_gate("G0", answer="unclear")])
+    f = codes(lint(e, load_profile("generic")), "L007")
+    assert len(f) == 1
+    assert f[0].gate_id == "G0"
+    assert f[0].to_dict()["gate_id"] == "G0"
+
+
+def test_l007_refuted_atom_behind_answer() -> None:
+    e = eng(
+        atoms=[atom("A-001", status="refuted")],
+        phases=[_ph("discovery", "running")],
+        gates=[_real_gate("G0", answer="yes", refs=["A-001"])],
+    )
+    f = codes(lint(e, load_profile("generic")), "L007")
+    assert [x.gate_id for x in f] == ["G0"]
+
+
+def test_l007_gate_id_only_on_l007() -> None:
+    e = eng(atoms=[atom("A-001", ref=None)])
+    f = lint(e, load_profile("generic"))
+    assert f and all(x.gate_id is None for x in f)
