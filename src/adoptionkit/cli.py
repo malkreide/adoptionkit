@@ -5,7 +5,7 @@ import re
 import sys
 from datetime import date
 from pathlib import Path
-from typing import get_args
+from typing import cast, get_args
 
 import typer
 
@@ -21,7 +21,7 @@ from adoptionkit.models import (
     Engagement,
     GateId,
 )
-from adoptionkit.profiles import gate_from_profile, load_profile
+from adoptionkit.profiles import Profile, gate_from_profile, load_profile, load_profile_file
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -46,6 +46,15 @@ def _root(
     ),
 ) -> None:
     """adoptionkit CLI."""
+
+
+def _resolve_profile(explicit: str | None, from_file: str) -> Profile:
+    """Explicit --profile may be a bundled name or a file; meta.profile only a bundled name."""
+    if explicit is None:
+        return load_profile(from_file)
+    if Path(explicit).is_file():
+        return load_profile_file(explicit)
+    return load_profile(explicit)
 
 
 @app.command()
@@ -84,7 +93,7 @@ def lint(
         raise typer.Exit(1)
     eng = Engagement.model_validate(data)
     try:
-        loaded = load_profile(profile or eng.meta.profile)
+        loaded = _resolve_profile(profile, eng.meta.profile)
     except AdoptionkitError as exc:
         typer.echo(str(exc))
         raise typer.Exit(1) from exc
@@ -128,8 +137,13 @@ def gate(
         raise _fail(f"Ungültiges Datum «{today}». Erwartet: YYYY-MM-DD.") from None
     try:
         eng = load_engagement(file)
-        loaded = load_profile(profile or eng.meta.profile)
-        new, evaluation = run_gate(eng, loaded, gate_id, day)  # type: ignore[arg-type]
+        loaded = _resolve_profile(profile, eng.meta.profile)
+        gid = cast(GateId, gate_id)
+        if gid not in loaded.gates:
+            raise AdoptionkitError(
+                f"Gate {gid} ist im Profil «{loaded.name}» nicht definiert."
+            )
+        new, evaluation = run_gate(eng, loaded, gid, day)
     except GateBlocked as exc:
         typer.echo("Gate blockiert, die Datei bleibt unverändert:")
         for f in exc.findings:
@@ -137,7 +151,10 @@ def gate(
         raise typer.Exit(1) from exc
     except AdoptionkitError as exc:
         raise _fail(str(exc)) from exc
-    save_engagement(new, file)
+    try:
+        save_engagement(new, file)
+    except OSError as exc:
+        raise _fail(f"{file}: nicht schreibbar: {exc}") from exc
     typer.echo(f"{evaluation.gate_id}: {evaluation.result}")
     if evaluation.recommendation is not None:
         typer.echo(f"Empfehlung: {evaluation.recommendation}")
@@ -163,7 +180,7 @@ def init(
     if target.exists():
         raise _fail(f"{target} existiert bereits.")
     try:
-        loaded = load_profile(profile)
+        loaded = _resolve_profile(profile, profile)
     except AdoptionkitError as exc:
         raise _fail(str(exc)) from exc
     today = date.today().isoformat()
@@ -189,9 +206,12 @@ def init(
     issues = validate_data(data)
     if issues:
         raise _fail("\n".join(f"{i.path}: {i.message}" for i in issues))
-    folder.mkdir(parents=True, exist_ok=True)
-    (folder / "evidence").mkdir(exist_ok=True)
-    save_engagement(Engagement.model_validate(data), target)
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "evidence").mkdir(exist_ok=True)
+        save_engagement(Engagement.model_validate(data), target)
+    except OSError as exc:
+        raise _fail(f"{folder}: nicht anlegbar: {exc}") from exc
     typer.echo(f"angelegt: {target}")
 
 

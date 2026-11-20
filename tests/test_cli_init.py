@@ -85,17 +85,17 @@ def test_init_invalid_id(tmp_path: Path) -> None:
     assert result.exit_code == 1
 
 
-def test_init_then_gate_blocked_by_l005_until_abort_criteria_set(tmp_path: Path) -> None:
-    """Fresh init has no abort criteria; L005 (error) blocks gates until they are filled in."""
+def test_init_then_gate_open(tmp_path: Path) -> None:
     target = tmp_path / "fall"
     runner.invoke(app, ["init", str(target)])
-    file = target / "engagement.json"
-    result = runner.invoke(app, ["gate", str(file), "G0"])
-    assert result.exit_code == 1 and "L005" in result.output
-    data = _load(target)
-    for p in data["phases"]:
-        p["abort_criterion"] = "Abbruch bei fehlendem Nutzen"
-    file.write_text(json.dumps(data), encoding="utf-8")
-    result = runner.invoke(app, ["gate", str(file), "G0"])
-    assert result.exit_code == 0
+    result = runner.invoke(app, ["gate", str(target / "engagement.json"), "G0"])
+    assert result.exit_code == 0, result.output
     assert "G0: open" in result.output
+
+
+def test_init_target_is_regular_file(tmp_path: Path) -> None:
+    f = tmp_path / "datei"
+    f.write_text("x", encoding="utf-8")
+    result = runner.invoke(app, ["init", str(f)])
+    assert result.exit_code == 1
+    assert "Traceback" not in result.output

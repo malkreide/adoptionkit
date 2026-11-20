@@ -30,7 +30,7 @@ RULES: dict[str, tuple[Severity, str]] = {
     "L002": ("warning", "Measure stützt sich auf eine Anforderung mit Status «assumed»."),
     "L003": ("warning", "Measure ohne Atom-Verweise."),
     "L004": ("error", "Neuentwicklung ohne Produktentscheid (Atom vom Typ «decision»)."),
-    "L005": ("error", "Phase ab «prototype» ohne Abbruchkriterium."),
+    "L005": ("error", "Gestartete Phase ab «prototype» ohne Abbruchkriterium."),
     "L007": ("error", "Phase gestartet oder abgeschlossen, ohne dass das geforderte Gate bestanden ist."),
 }
 
@@ -82,7 +82,7 @@ def lint(
                 )
 
     for p in eng.phases:
-        if PHASE_ORDER.index(p.id) >= 1 and not (p.abort_criterion or "").strip():
+        if PHASE_ORDER.index(p.id) >= 1 and p.status != "planned" and not (p.abort_criterion or "").strip():
             findings.append(
                 _finding("L005", f"phases/{p.id}", f"Phase {p.id} hat kein Abbruchkriterium.")
             )

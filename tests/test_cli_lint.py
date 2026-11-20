@@ -110,3 +110,13 @@ def test_lint_profile_option_overrides_meta(tmp_path: Path) -> None:
     f.write_text(json.dumps(data), encoding="utf-8")
     result = runner.invoke(app, ["lint", str(f), "--profile", "generic"])
     assert "L007 error" in result.output
+
+
+def test_lint_meta_profile_path_rejected(tmp_path: Path) -> None:
+    data = make_engagement()
+    data["meta"]["profile"] = "../x.yaml"
+    f = tmp_path / "e.json"
+    f.write_text(json.dumps(data), encoding="utf-8")
+    result = runner.invoke(app, ["lint", str(f)])
+    assert result.exit_code == 1
+    assert "Traceback" not in result.output

@@ -81,10 +81,15 @@ def evaluate_gate(eng: Engagement, profile: Profile, gate_id: GateId) -> GateEva
 def run_gate(
     eng: Engagement, profile: Profile, gate_id: GateId, today: date
 ) -> tuple[Engagement, GateEvaluation]:
-    errors = [f for f in lint(eng, profile, today) if f.severity == "error"]
+    evaluation = evaluate_gate(eng, profile, gate_id)  # R1 before lint
+    own = f"Gate {gate_id} "
+    errors = [
+        f
+        for f in lint(eng, profile, today)
+        if f.severity == "error" and not (f.code == "L007" and own in f.message)
+    ]
     if errors:
         raise GateBlocked(errors)
-    evaluation = evaluate_gate(eng, profile, gate_id)
 
     new = eng.model_copy(deep=True)
     template = gate_from_profile(profile, gate_id)

@@ -191,15 +191,12 @@ def test_evaluate_does_not_mutate() -> None:
 
 
 def test_r9_blocked_by_lint_error() -> None:
-    e = Engagement.model_validate(
-        make_engagement(
-            atoms=[atom("A-001")],
-            phases=[{"id": "discovery", "budget_days": 1, "status": "running"}],
-        )
-    )
+    bad = atom("A-001")
+    bad["source"] = {"kind": "document"}
+    e = Engagement.model_validate(make_engagement(atoms=[bad]))
     with pytest.raises(GateBlocked) as exc:
         run_gate(e, PROFILE, "G0", TODAY)
-    assert [f.code for f in exc.value.findings] == ["L007"]
+    assert [f.code for f in exc.value.findings] == ["L001"]
 
 
 def test_r9_warnings_do_not_block() -> None:
@@ -245,3 +242,21 @@ def test_run_gate_keeps_answers_and_refreshes_text() -> None:
     assert c1.answer == "yes" and c1.atom_refs == ["A-001"]
     assert ev.recommendation == "guided_rollout"
     assert e.meta.updated != TODAY
+
+
+def test_r9_ignores_l007_for_evaluated_gate() -> None:
+    e = Engagement.model_validate(
+        make_engagement(phases=[{"id": "discovery", "budget_days": 1, "status": "running"}])
+    )
+    new, ev = run_gate(e, PROFILE, "G0", TODAY)
+    assert ev.result == "open"
+    assert new.gate("G0") is not None
+
+
+def test_r9_other_gates_l007_still_blocks() -> None:
+    e = Engagement.model_validate(
+        make_engagement(phases=[{"id": "value_proof", "budget_days": 1, "status": "running",
+                                 "abort_criterion": "x"}])
+    )
+    with pytest.raises(GateBlocked):
+        run_gate(e, PROFILE, "G0", TODAY)

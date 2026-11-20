@@ -81,11 +81,12 @@ def test_gate_stopped_decline(tmp_path: Path) -> None:
 
 
 def test_gate_blocked_leaves_file_unchanged(tmp_path: Path) -> None:
-    f = _write(tmp_path, phases=[{"id": "discovery", "budget_days": 1, "status": "running"}])
+    bad = {**ATOM, "source": {"kind": "document"}}
+    f = _write(tmp_path, atoms=[bad])
     before = f.read_bytes()
     result = runner.invoke(app, ["gate", str(f), "G0", "--today", "2026-05-04"])
     assert result.exit_code == 1
-    assert "L007" in result.output
+    assert "L001" in result.output
     assert f.read_bytes() == before
 
 
@@ -130,3 +131,35 @@ def test_gate_default_today_is_used(tmp_path: Path) -> None:
     assert result.exit_code == 0
     saved = json.loads(f.read_text(encoding="utf-8"))
     assert saved["gates"][0]["evaluated_on"] == date.today().isoformat()
+
+
+def test_gate_meta_profile_path_rejected(tmp_path: Path) -> None:
+    data = make_engagement()
+    data["meta"]["profile"] = r"\\server\share\p.yaml"
+    f = tmp_path / "e.json"
+    f.write_text(json.dumps(data), encoding="utf-8")
+    result = runner.invoke(app, ["gate", str(f), "G0"])
+    assert result.exit_code == 1
+    assert "Traceback" not in result.output
+
+
+def test_gate_profile_option_file_works(tmp_path: Path) -> None:
+    import adoptionkit
+
+    src = Path(adoptionkit.__file__).parent / "profiles" / "generic.yaml"
+    pf = tmp_path / "mine.yaml"
+    pf.write_text(src.read_text("utf-8"), encoding="utf-8")
+    data = make_engagement()
+    data["meta"]["profile"] = "gibt-es-nicht"
+    f = tmp_path / "e.json"
+    f.write_text(json.dumps(data), encoding="utf-8")
+    result = runner.invoke(app, ["gate", str(f), "G0", "--profile", str(pf)])
+    assert result.exit_code == 0, result.output
+
+
+def test_gate_not_in_profile_beats_lint_block(tmp_path: Path) -> None:
+    bad = {**ATOM, "source": {"kind": "document"}}
+    f = _write(tmp_path, atoms=[bad])
+    result = runner.invoke(app, ["gate", str(f), "G1"])
+    assert result.exit_code == 1
+    assert "nicht definiert" in result.output and "L001" not in result.output

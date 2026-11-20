@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from importlib import resources
 from pathlib import Path
 from typing import Literal
@@ -11,6 +12,8 @@ from pydantic import BaseModel, ConfigDict, ValidationError, field_validator
 
 from adoptionkit.errors import AdoptionkitError
 from adoptionkit.models import DISCLAIMER, Check, Gate, GateId, PhaseId
+
+_NAME = re.compile(r"^[a-z0-9-]+$")
 
 
 class _Base(BaseModel):
@@ -59,19 +62,23 @@ def _parse(text: str, origin: str) -> Profile:
         raise AdoptionkitError(f"Profil {origin} ungültig: {exc}") from exc
 
 
-def load_profile(name_or_path: str) -> Profile:
-    path = Path(name_or_path)
-    if path.is_file():
-        try:
-            return _parse(path.read_text(encoding="utf-8"), str(path))
-        except (OSError, UnicodeDecodeError) as exc:
-            raise AdoptionkitError(f"Profil {path} nicht lesbar: {exc}") from exc
-    resource = resources.files("adoptionkit") / "profiles" / f"{name_or_path}.yaml"
-    if resource.is_file():
-        return _parse(resource.read_text(encoding="utf-8"), name_or_path)
-    raise AdoptionkitError(
-        f"Profil «{name_or_path}» nicht gefunden. Verfügbar: {', '.join(_available())}"
-    )
+def load_profile(name: str) -> Profile:
+    """Load a bundled profile by name. Never touches arbitrary filesystem paths."""
+    if not _NAME.fullmatch(name) or name not in _available():
+        raise AdoptionkitError(
+            f"Profil «{name}» nicht gefunden. Verfügbar: {', '.join(_available())}"
+        )
+    resource = resources.files("adoptionkit") / "profiles" / f"{name}.yaml"
+    return _parse(resource.read_text(encoding="utf-8"), name)
+
+
+def load_profile_file(path: str | Path) -> Profile:
+    """Load a profile from an explicitly given file."""
+    p = Path(path)
+    try:
+        return _parse(p.read_text(encoding="utf-8"), str(p))
+    except (OSError, UnicodeDecodeError) as exc:
+        raise AdoptionkitError(f"Profil {p} nicht lesbar: {exc}") from exc
 
 
 def gate_from_profile(profile: Profile, gate_id: GateId) -> Gate:

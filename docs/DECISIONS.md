@@ -39,4 +39,7 @@ Ablage `skills/ai-rollout/SKILL.md`. Der Name beschreibt die Tätigkeit und ist 
 
 - **Build-Backend und Ruff-Regeln wie bei journeykit:** setuptools, `src`-Layout, ruff mit `E,F,W,I,UP`. Abweichend vom Bauplan nicht, nur ergänzend.
 - **Schema aus den Modellen:** `engagement.schema.json` wird mit `python -m adoptionkit.schema_gen` erzeugt und eingecheckt; ein Test vergleicht beide.
-- **Gate-Ergebnis `stopped`:** Ein Gate gilt als `stopped`, wenn eine Frage mit `stop_on: no` im Profil mit `no` beantwortet ist und belegt ist. G0 liefert dann die Empfehlung `decline`.
+- **Gate-Ergebnis `stopped`:** Ein Gate gilt als `stopped`, wenn eine Frage mit `stop_if` im Profil der gegebenen Antwort entspricht (`yes` oder `no`) und die Antwort belegt ist. G0 liefert dann die Empfehlung `decline`.
+- **L005 nur für gestartete Phasen:** Das Abbruchkriterium ist ab `prototype` Pflicht, sobald die Phase nicht mehr `planned` ist. Sonst wäre jedes frisch mit `init` angelegte Dossier sofort blockiert.
+- **Profilname aus der Datei nur als mitgeliefertes Profil:** `meta.profile` löst nur auf Profile im Paket auf (Muster `a-z`, `0-9`, `-`). Dateipfade gelten nur über `--profile`. Grund: keine Netz- oder UNC-Zugriffe aus fremden Dossiers.
+- **R9 ignoriert L007-Befunde zum ausgewerteten Gate:** Sonst blockiert L007 genau die Auswertung, die den Befund auflösen würde (Selbstblockade). Andere Fehler blockieren weiterhin.

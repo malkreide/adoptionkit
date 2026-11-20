@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
 from conftest import make_engagement
 
 from adoptionkit.lints import RULES, Finding, lint
@@ -146,13 +147,24 @@ def _phase(id_: str, **kw: Any) -> dict[str, Any]:
 
 
 def test_l005_missing_abort_criterion() -> None:
-    e = eng(phases=[_phase("discovery"), _phase("prototype")])
+    e = eng(phases=[_phase("discovery"), _phase("prototype", status="running")])
     f = codes(lint(e), "L005")
     assert [(x.severity, x.path) for x in f] == [("error", "phases/prototype")]
 
 
 def test_l005_blank_abort_criterion() -> None:
-    e = eng(phases=[_phase("hardening", abort_criterion="  ")])
+    e = eng(phases=[_phase("hardening", status="running", abort_criterion="  ")])
+    assert len(codes(lint(e), "L005")) == 1
+
+
+def test_l005_planned_phase_without_criterion_ok() -> None:
+    e = eng(phases=[_phase("prototype"), _phase("handover", status="planned")])
+    assert codes(lint(e), "L005") == []
+
+
+@pytest.mark.parametrize("status", ["running", "done", "aborted"])
+def test_l005_started_phase_without_criterion(status: str) -> None:
+    e = eng(phases=[_phase("value_proof", status=status)])
     assert len(codes(lint(e), "L005")) == 1
 
 
