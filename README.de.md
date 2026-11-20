@@ -62,7 +62,11 @@ L003 warning measures/M-004: Measure M-004 verweist auf kein Atom.
 
 Die beiden Warnungen sind beabsichtigt: Sie zeigen, was die Lints melden.
 
+`gate` schreibt das Ergebnis in die Datei, also zuerst das Beispiel ins Arbeitsverzeichnis kopieren (bash, oder `Copy-Item` in PowerShell):
+
 ```bash
+cp examples/synthetic-municipality/engagement.json .
+# PowerShell: Copy-Item examples/synthetic-municipality/engagement.json .
 adoptionkit gate engagement.json G0 --today 2026-09-07
 ```
 ```
@@ -71,13 +75,13 @@ Empfehlung: guided_rollout
 Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären.
 ```
 
-`gate` schreibt das Ergebnis in die Datei, also auf einer Kopie des Beispiels ausführen. Zum Schluss eine einzelne HTML-Datei erzeugen, die offline öffnet:
+Zum Schluss eine einzelne HTML-Datei erzeugen, die offline öffnet:
 
 ```bash
 adoptionkit view examples/synthetic-municipality/engagement.json -o dossier.html
 ```
 
-Ein eigenes Dossier startet mit `adoptionkit init mein-dossier --profile generic --title "..."`.
+Ein eigenes Dossier startet mit `adoptionkit init mein-dossier --profile generic --title "..."`. Ein nicht gebündeltes Profil muss ausdrücklich mit `--profile <pfad>` übergeben werden (auch bei `lint` und `gate`); `meta.profile` löst nur gebündelte Namen auf.
 
 ## CLI-Befehle
 

@@ -27,7 +27,7 @@ Diese Regeln gelten immer. Sie schützen davor, dass ein Dossier mehr behauptet,
 adoptionkit init <ordner> --profile generic --title "<Titel>" --id <kennung>
 ```
 
-Legt `engagement.json` und `evidence/` an. Profil `generic` ist gebündelt; `--profile` nimmt auch einen Dateipfad. Fülle `parties` und `solution` aus den Angaben der Person, leere Felder bleiben leer, bis sie belegt sind. Rohmaterial (Notizen, Dokumente) gehört nach `evidence/`; `source.ref` zeigt auf diese Dateien.
+Legt `engagement.json` und `evidence/` an. Profil `generic` ist gebündelt; `--profile` nimmt auch einen Dateipfad, und eigene Profile müssen bei `lint` und `gate` ebenfalls mit `--profile <pfad>` übergeben werden, weil `meta.profile` nur gebündelte Namen auflöst. Fülle `parties` und `solution` aus den Angaben der Person, leere Felder bleiben leer, bis sie belegt sind. Rohmaterial (Notizen, Dokumente) gehört nach `evidence/`; `source.ref` zeigt auf diese Dateien.
 
 ### 2. Rohmaterial in Atome zerlegen
 
