@@ -1,0 +1,702 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/malkreide/adoptionkit/schema/engagement.schema.json",
+  "$defs": {
+    "Artefact": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^X-\\d{3}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "origin_measure": {
+          "title": "Origin Measure",
+          "type": "string"
+        },
+        "fate": {
+          "default": "open",
+          "enum": [
+            "open",
+            "generalised",
+            "dropped"
+          ],
+          "title": "Fate",
+          "type": "string"
+        },
+        "reviewed_on": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed On"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "origin_measure"
+      ],
+      "title": "Artefact",
+      "type": "object"
+    },
+    "Atom": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^A-\\d{3}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "requirement",
+            "constraint",
+            "data_source",
+            "risk",
+            "usage_signal",
+            "decision"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "statement": {
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        },
+        "status": {
+          "enum": [
+            "evidenced",
+            "assumed",
+            "refuted"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "statement",
+        "source",
+        "status"
+      ],
+      "title": "Atom",
+      "type": "object"
+    },
+    "Check": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^G[0-4]-\\d{2}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "answer": {
+          "default": "unclear",
+          "enum": [
+            "yes",
+            "no",
+            "unclear",
+            "n/a"
+          ],
+          "title": "Answer",
+          "type": "string"
+        },
+        "atom_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Atom Refs",
+          "type": "array"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "question",
+        "source_ref"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "EvalRun": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^R-\\d{3}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "metric",
+        "value"
+      ],
+      "title": "EvalRun",
+      "type": "object"
+    },
+    "Evals": {
+      "additionalProperties": false,
+      "properties": {
+        "eval_set_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eval Set Ref"
+        },
+        "thresholds": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Thresholds",
+          "type": "object"
+        },
+        "runs": {
+          "items": {
+            "$ref": "#/$defs/EvalRun"
+          },
+          "title": "Runs",
+          "type": "array"
+        }
+      },
+      "title": "Evals",
+      "type": "object"
+    },
+    "Gate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "enum": [
+            "G0",
+            "G1",
+            "G2",
+            "G3",
+            "G4"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/Check"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "enum": [
+                "passed",
+                "open",
+                "stopped"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
+        },
+        "recommendation": {
+          "anyOf": [
+            {
+              "enum": [
+                "guided_rollout",
+                "standard_rollout",
+                "decline"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recommendation"
+        },
+        "evaluated_on": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evaluated On"
+        },
+        "disclaimer": {
+          "default": "Arbeitshilfe, keine Rechtsberatung. Offene Punkte mit der zuständigen Fachstelle klären.",
+          "title": "Disclaimer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "Gate",
+      "type": "object"
+    },
+    "Handover": {
+      "additionalProperties": false,
+      "properties": {
+        "operators": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Operators",
+          "type": "array"
+        },
+        "training_done": {
+          "default": false,
+          "title": "Training Done",
+          "type": "boolean"
+        },
+        "runbook_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runbook Ref"
+        }
+      },
+      "title": "Handover",
+      "type": "object"
+    },
+    "Measure": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^M-\\d{3}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "change_type": {
+          "enum": [
+            "configuration",
+            "template",
+            "new_development"
+          ],
+          "title": "Change Type",
+          "type": "string"
+        },
+        "status": {
+          "default": "proposed",
+          "enum": [
+            "proposed",
+            "accepted",
+            "implemented",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "atom_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Atom Refs",
+          "type": "array"
+        },
+        "product_decision_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Decision Ref"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "change_type"
+      ],
+      "title": "Measure",
+      "type": "object"
+    },
+    "Meta": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "created": {
+          "format": "date",
+          "title": "Created",
+          "type": "string"
+        },
+        "updated": {
+          "format": "date",
+          "title": "Updated",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "0.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        },
+        "synthetic": {
+          "default": false,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "created",
+        "updated",
+        "schema_version",
+        "profile"
+      ],
+      "title": "Meta",
+      "type": "object"
+    },
+    "Parties": {
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "title": "Client",
+          "type": "string"
+        },
+        "contractor": {
+          "title": "Contractor",
+          "type": "string"
+        },
+        "conflict_of_interest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conflict Of Interest"
+        }
+      },
+      "required": [
+        "client",
+        "contractor"
+      ],
+      "title": "Parties",
+      "type": "object"
+    },
+    "Phase": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "enum": [
+            "discovery",
+            "prototype",
+            "value_proof",
+            "hardening",
+            "handover"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "budget_days": {
+          "minimum": 0,
+          "title": "Budget Days",
+          "type": "integer"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "status": {
+          "default": "planned",
+          "enum": [
+            "planned",
+            "running",
+            "done",
+            "aborted"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "abort_criterion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Abort Criterion"
+        }
+      },
+      "required": [
+        "id",
+        "budget_days"
+      ],
+      "title": "Phase",
+      "type": "object"
+    },
+    "Solution": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "vendor": {
+          "title": "Vendor",
+          "type": "string"
+        },
+        "hosting_model": {
+          "default": "unknown",
+          "enum": [
+            "saas",
+            "private_cloud",
+            "on_premise",
+            "hybrid",
+            "unknown"
+          ],
+          "title": "Hosting Model",
+          "type": "string"
+        },
+        "data_location": {
+          "default": "",
+          "title": "Data Location",
+          "type": "string"
+        },
+        "config_limits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Config Limits",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "vendor"
+      ],
+      "title": "Solution",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "interview",
+            "document",
+            "system",
+            "analytics",
+            "regulation",
+            "workshop"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ref"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "Source",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "parties": {
+      "$ref": "#/$defs/Parties"
+    },
+    "solution": {
+      "$ref": "#/$defs/Solution"
+    },
+    "atoms": {
+      "items": {
+        "$ref": "#/$defs/Atom"
+      },
+      "title": "Atoms",
+      "type": "array"
+    },
+    "phases": {
+      "items": {
+        "$ref": "#/$defs/Phase"
+      },
+      "title": "Phases",
+      "type": "array"
+    },
+    "gates": {
+      "items": {
+        "$ref": "#/$defs/Gate"
+      },
+      "title": "Gates",
+      "type": "array"
+    },
+    "measures": {
+      "items": {
+        "$ref": "#/$defs/Measure"
+      },
+      "title": "Measures",
+      "type": "array"
+    },
+    "evals": {
+      "$ref": "#/$defs/Evals"
+    },
+    "artefacts": {
+      "items": {
+        "$ref": "#/$defs/Artefact"
+      },
+      "title": "Artefacts",
+      "type": "array"
+    },
+    "handover": {
+      "$ref": "#/$defs/Handover"
+    }
+  },
+  "required": [
+    "meta",
+    "parties",
+    "solution"
+  ],
+  "title": "adoptionkit engagement",
+  "type": "object"
+}
